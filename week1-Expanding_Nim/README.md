@@ -14,6 +14,6 @@ In our tornament, two teams will play expanding nim with a reset option against 
 
 The game can be found at: [Munir Manan Contractor's Gitlab repository](https://gitlab.com/mmc691/expanding-nim-platform)
 
-A copy of the game is also provided [here](expanding-nim-platform-master-59005f4f1594f1dc2d7495c0c3bcce0671d48dd9.tar).
+A copy of the game is also provided [here](expanding-nim-platform-master-7c57b89bc2b810a8f24d47b0f43b90d7c14d5eb8.zip).
 
 To run the game, download the game as a compressed file and uncompress it. 
