@@ -89,7 +89,7 @@ class Client():
         Return:
             A dict containing the keys described above
         """
-        return json.loads(self.socket.recv(self.DATA_SIZE))
+        return json.loads(self.socket.recv(self.DATA_SIZE).decode('utf-8'))
 
     def __read_move(self):
         try:
@@ -129,4 +129,3 @@ class Client():
         if status['finished']:
             print('Game over\n%s' % status['reason'])
             exit(0)
-
