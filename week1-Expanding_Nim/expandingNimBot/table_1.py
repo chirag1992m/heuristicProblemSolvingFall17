@@ -14,6 +14,8 @@ def compute():
                             move = 0
                             doReset = 0
                             for i in range(1,curMax + 1):
+                                if i > stones:
+                                    break
                                 if(table[stones-i][max(i+1,curMax)][reset2][reset1][0][0] == 0):
                                     win = True
                                     move = i
@@ -25,6 +27,8 @@ def compute():
                                 continue
                             if(reset1 > 0):
                                 for i in range(1,curMax + 1):
+                                    if i > stones:
+                                        break
                                     if(table[stones-i][max(i+1,curMax)][reset2][reset1-1][1][0] == 0):
                                         win = True
                                         move = i
@@ -40,6 +44,8 @@ def compute():
                             doReset = 0
                             win = False
                             for i in range(1,N+1):
+                                if i > stones:
+                                    break
                                 if(table[stones-i][max(i+1,curMax)][reset2][reset1][0][0] == 0):
                                     win = True
                                     move = i
@@ -51,6 +57,8 @@ def compute():
                                 continue
                             if(reset1 > 0):
                                 for i in range(1,N+1):
+                                    if i > stones:
+                                        break
                                     if(table[stones-i][max(i+1,curMax)][reset2][reset1-1][1][0] == 0):
                                         win = True
                                         move = i
