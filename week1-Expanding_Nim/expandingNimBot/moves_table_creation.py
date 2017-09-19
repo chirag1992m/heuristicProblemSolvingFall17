@@ -1,4 +1,5 @@
 import pickle
+import random
 
 table = [[[[[[0,0,0] for m in range(2)] for l in range(5)] for k in range(5)] for j in range(50)] for i in range(1001)]
 N = 3
@@ -38,7 +39,7 @@ def compute():
                                 if(win):
                                     table[stones][curMax][reset1][reset2][lastReset] = [1, move, doReset]
                                     continue
-                            table[stones][curMax][reset1][reset2][lastReset] = [0, 1, 0]
+                            table[stones][curMax][reset1][reset2][lastReset] = [0, random.randint(1, curMax), 0]
                         else:
                             move = 0
                             doReset = 0
@@ -68,7 +69,7 @@ def compute():
                                 if(win):
                                     table[stones][curMax][reset1][reset2][lastReset] = [1, move, doReset]
                                     continue
-                            table[stones][curMax][reset1][reset2][lastReset] = [0, 1, 0]
+                            table[stones][curMax][reset1][reset2][lastReset] = [0, random.randint(1, curMax), 0]
 
 def main():
     compute()

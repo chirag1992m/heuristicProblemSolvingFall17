@@ -1,6 +1,6 @@
 import pickle
 import os
-from table_1 import main as table_creator
+from moves_table_creation import main as table_creator
 
 class Bot(object):
 
