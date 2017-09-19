@@ -5,7 +5,7 @@ from bot import Bot
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Expanding Nim Player')
-    parser.add_argument('--n', dest="name", type=str, default='Player',
+    parser.add_argument('--n', dest="name", type=str, default='House Targaryen',
                         help='Name of the player')
     parser.add_argument('--f', dest="first", action="store_true",
                         help="Is it the first player?")
@@ -53,3 +53,4 @@ if __name__ == '__main__':
         stones, current_max, reset_used = parse_game_stats(game_state)
         num_stones, reset = bot.get_move(stones, current_max, reset_used)
         check_game_status(client.make_move(num_stones, reset))
+
