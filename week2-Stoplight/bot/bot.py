@@ -86,8 +86,9 @@ def get_moves(full_path, color_list):
 
     for i in range(len(full_path) - 1):
         start_node, end_node = full_path[i], full_path[i+1]
-        end_time = distance_to_neighbor(current_time, start_node[1], color_list)
+        end_time = distance_to_neighbor(current_time, start_node[1], color_list) + current_time
         start_time = end_time - start_node[1][2]
+        current_time = end_time
 
         move = [start_node[0], end_node[0], str(start_time), str(end_time)]
         moves.append(' '.join(move))
