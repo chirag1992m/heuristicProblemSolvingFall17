@@ -1,0 +1,14 @@
+n1 n4
+node1 node2 color traversetime
+n1 n2 c1 10
+n1 n3 c2 10
+n3 n4 c3 10
+n2 n4 c4 10
+n3 n2 c2 10
+n2 n3 c4 10
+
+color greentime redtime
+c1 10 10
+c2 10 10
+c3 10 10
+c4 10 10
