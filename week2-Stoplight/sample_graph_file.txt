@@ -1,4 +1,4 @@
-startnode endnode
+n1 n100
 node1 node2 color traversetime
 n165 n69 c2 17
 n136 n54 c5 19
