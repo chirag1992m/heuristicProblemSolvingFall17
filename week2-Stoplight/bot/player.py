@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import argparse
 from client import Client
 import bot
@@ -18,10 +20,16 @@ if __name__ == "__main__":
     args = parse_arguments()
 
     client = Client(args.ip, args.port)
+    print("Client Connected")
 
     file_text = client.recv_stoplight()
+    print("Got the file.")
+    print(file_text)
+
     node_list, edge_list, color_list, start_node, end_node = bot.read_stoplight_info_file(file_text.split('\n'))
     moves_string = bot.stoplight_dijkstra(node_list, edge_list, color_list, start_node, end_node)
     client.send_resp(moves_string)
 
+    print("Moves generated:")
+    print(moves_string)
     pickle.dump((file_text, moves_string), open("game_file.pkl", 'wb'))

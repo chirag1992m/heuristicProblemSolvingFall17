@@ -68,5 +68,5 @@ class Client :
             
     def wrap_send(): #wrapper for send_resp
         moves = '-1'.join(iter(raw_input, sentinel))
-        send_resp(moves)
+        send_resp(moves)        
 
