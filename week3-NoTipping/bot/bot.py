@@ -121,7 +121,7 @@ def remove(board, stonesLeft):
                     torque1  = temp1
                     torque2 = temp2
                     print("Removing from position ", k-30)
-                    return
+                    return k-30
                 else:
                     board[k] = temp
     tt = 10000000000
