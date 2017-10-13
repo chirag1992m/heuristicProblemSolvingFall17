@@ -1,0 +1,146 @@
+<html>
+  <header>
+    <title>Gravitational Voronoi</title>
+  </header>
+  <style>
+  body {
+    background-color: FloralWhite;
+  }
+  h1 {
+    color: brown;
+    text-align: center;
+    font-family: "Comic Sans MS", cursive, sans-serif;
+  }
+
+  p {
+    font-family: verdana;
+    font-size: 20px;
+  }
+
+  #canvas {
+    border:8px solid #c3c3c3;
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    width: 800px;
+  }
+  </style>
+  <body>
+    <h1>
+      Gravitational Voronoi
+    </h1>
+
+    <canvas id="canvas" width="1000" height="1000">
+      Your browser does not support the HTML5 canvas tag.
+    </canvas>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+      var socket = io("127.0.0.1:10000");
+
+      var canvas = document.getElementById('canvas');
+      var canvasWidth = canvas.width;
+      var canvasHeight = canvas.height;
+      var boardSize = canvasWidth;
+      var ctx = canvas.getContext('2d');
+
+      var colors = ['red', 'blue', 'green', 'orange', 'yellow', 'purple',
+          'silver', 'olive', 'teal'];
+
+      var colorRGB = [[255,0,0], [0,0,255], [0,255,0], [255,165,0],
+          [255,255,0], [128,0,128], [192,192,192],
+          [128,128,0], [0,128,128]];
+
+      var moves = [];
+
+      function drawStones(boardData)
+      {
+        var board = boardData.split(" ");
+        var j = parseInt(board[board.length - 1]);
+        var i = parseInt(board[board.length - 2]);
+        var currentTurn = parseInt(board[board.length - 3]);
+
+        moves[currentTurn - 1].push([j, i]);
+
+        for(var b = 0 ; b < moves.length ; b++)
+        {
+          for(var a = 0 ; a < moves[b].length ; a++)
+          {
+            var centerX = moves[b][a][0];
+            var centerY = moves[b][a][1];
+            var radius = 10;
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+
+            var color = colors[b];
+
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#003300';
+            ctx.stroke();
+          }
+        }
+      }
+
+      function drawBoard(boardData)
+      {
+        var board = boardData.split(" ");
+        var j = parseInt(board[board.length - 1]);
+        var i = parseInt(board[board.length - 2]);
+        var numberOfPlayers = parseInt([board[board.length - 4]]);
+
+        if (moves.length == 0)
+        {
+          for(var i = 0 ; i < numberOfPlayers ; i++)
+          {
+            moves.push([]);
+          }
+        }
+
+        var imageData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
+        var data = imageData.data;
+
+
+        for (var y = 0; y < 1000; y++)
+        {
+          for (var x = 0; x < 1000; x++)
+          {
+            var index = (y * 1000 + x) * 4;
+
+            player = parseInt(board[index/4]);
+
+            if(player > 0)
+            {
+              var gridColor = colorRGB[player - 1];
+
+              data[index]   = gridColor[0];
+              data[++index] = gridColor[1];
+              data[++index] = gridColor[2];
+              data[++index] = 125;
+            }
+          }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+      }
+
+      function resetBoard() {
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+        moves = [];
+      }
+
+      socket.on('to_client', function(data)
+        {
+          drawBoard(data);
+          drawStones(data);
+        });
+
+      socket.on('reset', resetBoard);
+
+    </script>
+  </body>
+</html>
