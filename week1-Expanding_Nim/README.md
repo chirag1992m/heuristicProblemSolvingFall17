@@ -17,3 +17,18 @@ The game can be found at: [Munir Manan Contractor's Gitlab repository](https://g
 A copy of the game is also provided [here](expanding-nim-platform-master-74d0cde4e7529abf9beafaed5e77a226c9967873.zip).
 
 To run the game, download the game as a compressed file and uncompress it. 
+
+## Approach to play (Bot Description)
+It was a simple game with limited and countable number of states 
+to take care of with full information.
+
+The states can be calculated by determining all the possible values used to
+describe one state:
+
+Number of players * (Number of resets^(Number of players)) * Number of 
+stones left * Number of stones which can be picked up = 2 * (4**2) * 1000 * 50 = 6.4 million
+
+These number of states can easily be pre calculated and stored in a table
+by building it up using dynamic programming. Thus, one can always make the
+most optimal move at any given point of time with the given set of limits
+on the game states.
