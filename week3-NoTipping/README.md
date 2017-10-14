@@ -59,3 +59,12 @@ As mentioned by our prof. [Dennis Shasha](http://cs.nyu.edu/shasha/)
 it's a challenge to beat the random strategy.
 
 ## Our strategy
+Here, there is no way we can deterministically calculate the optimal move
+with the computing resources available at our disposal and we had to resort
+to simple heuristic to decide what move to make next.
+
+We have simple heuristics:
+- Always take a valid move that won't tip the board
+- Take the move which minimizes the torque on each of the pivots
+- After the number of moves left is way too less, we can start
+deciding our deterministically.
