@@ -23,3 +23,6 @@ A copy of the last working copy can also be found [here](StoplightShortestPath.z
 The instruction to run the game are given in a README file inside the game itself.
 
 ## Approach to play (Bot Description)
+This game can be played using a modified dijkstra's algorithm. The dijkstra
+simply takes into the current red/green light timings while calculating the
+`distance` to the neighboring node.
