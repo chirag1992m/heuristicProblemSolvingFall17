@@ -1,5 +1,6 @@
 # Gravitational Voronoi
 
+## Game Description
 The game is played on a 1000 by 1000 grid. Given a set of 
 point-sized stones (which we will call ``stones'' for simplicity) 
 of various colors, a gravitational Voronoi diagram is a 
@@ -36,7 +37,27 @@ players compete.
 For the two player game, we will take the sum of your scores 
 as first player and second player.
 
-# How to run the game?
+## How to run the game?
 Game can be downloaded from [here](https://github.com/guyu96/Gravitational_Voronoi).
 
 A copy of the game has been provided [here](Gravitational_Voronoi.zip).
+
+## Strategies
+
+### [Random Bot](bot/client.py)
+It simply finds a `random` valid move and makes that.
+
+### [Cluster Bot](bot/cluster_bot.py)
+Find the most optimal points to put on the grid by K-Means clustering.
+If we find the optimal centroids of the grid, these centroid create
+the maximum pull. To win over such a board, the opponent needs to at 
+least have 2 or more stones in every cluster to win over the board.
+But, a situation can easily arise where the centroid is already been 
+occupied by the opponent, in that case we find the random 
+nearest to centroid valid point.
+
+To get the centroids, we run pre-computations.
+
+## [Competitions](bot/competition.py)
+Runs multiple games between any two given types of bot and present
+statistics which of the bot won.
