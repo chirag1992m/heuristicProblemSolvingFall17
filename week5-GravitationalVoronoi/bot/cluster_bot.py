@@ -36,15 +36,14 @@ class ClusterBot(Client):
 
     @staticmethod
     def compute_clusters(k):
-        start_time = time.time()
         centroids = [[random.randint(0, 999), random.randint(0, 999)] for _ in range(k)]
         points = [[] for _ in range(k)]
         last = []
-        turns = 0
+        total_time = 1800 * k
+        start_time = time.time()
         while last != centroids:
-            if turns > 100:
+            if time.time() - start_time > total_time:
                 break
-            turns += 1
             last = centroids
             # reorganize
             for i in range(1000):
@@ -67,7 +66,6 @@ class ClusterBot(Client):
                 new_clusters[l][0] = int(new_clusters[l][0])
                 new_clusters[l][1] = int(new_clusters[l][1])
             centroids = new_clusters
-        print("Took {} time to compute centroids.".format(time.time() - start_time))
         return centroids
 
     def get_closest_valid_point(self, move_row, move_col):
