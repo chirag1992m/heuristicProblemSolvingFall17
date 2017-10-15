@@ -27,7 +27,6 @@ def run_bot1(arg, counter):
     bot.start()
     if bot.winner == 1:
         counter.value += 1
-    print(counter.value)
 
 
 def run_bot2(arg, counter):
@@ -35,7 +34,6 @@ def run_bot2(arg, counter):
     bot.start()
     if bot.winner == 2:
         counter.value += 1
-    print(counter.value)
 
 
 if __name__ == "__main__":
@@ -57,5 +55,5 @@ if __name__ == "__main__":
             job.join()
         time.sleep(5.0)
 
-    print("Player 1 win count: {}".format(winner_count_1.value))
-    print("Player 2 win count: {}".format(winner_count_2.value))
+    print("Player {} win count: {}".format(args.bot1, winner_count_1.value))
+    print("Player {} win count: {}".format(args.bot2, winner_count_2.value))
