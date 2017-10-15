@@ -39,7 +39,7 @@ class ClusterBot(Client):
         centroids = [[random.randint(0, 999), random.randint(0, 999)] for _ in range(k)]
         points = [[] for _ in range(k)]
         last = []
-        total_time = 1800 * k
+        total_time = 450 * k
         start_time = time.time()
         while last != centroids:
             if time.time() - start_time > total_time:
