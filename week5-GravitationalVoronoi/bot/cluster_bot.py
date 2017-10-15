@@ -2,15 +2,31 @@ import time
 import math
 import random
 import argparse
-from .client import Client
+import pickle
+import os
+from client import Client
 
 
 class ClusterBot(Client):
 
     def __init__(self, host, port, name):
+        self.pre_calculate_clusters()
         super().__init__(host, port, name)
-        self.cluster = self.compute_clusters()
+        self.cluster = self.load_clusters(self.num_stones)
         self.current_move = 0
+
+    @staticmethod
+    def load_clusters(num_stones):
+        return pickle.load(open('cluster_bot_precomputed_{}.pkl'.format(num_stones), 'r'))
+
+    @staticmethod
+    def pre_calculate_clusters():
+        for k in range(1, 13):
+            file_name = 'cluster_bot_precomputed_{}.pkl'.format(k)
+            if os.path.exists(file_name):
+                continue
+            clusters = ClusterBot.compute_clusters(k)
+            pickle.dump(clusters, open(file_name, 'wb'))
 
     @staticmethod
     def euclidean(point1, point2):
@@ -18,9 +34,9 @@ class ClusterBot(Client):
         distance += (point1[1] - point2[1]) * (point1[1] - point2[1])
         return math.sqrt(distance)
 
-    def compute_clusters(self):
+    @staticmethod
+    def compute_clusters(k):
         start_time = time.time()
-        k = self.num_stone
         centroids = [[random.randint(0, 999), random.randint(0, 999)] for _ in range(k)]
         points = [[] for _ in range(k)]
         last = []
@@ -36,7 +52,7 @@ class ClusterBot(Client):
                     index = -1
                     closest_dist = 2000
                     for l in range(k):
-                        cur_dist = self.euclidean(centroids[l], [i, j])
+                        cur_dist = ClusterBot.euclidean(centroids[l], [i, j])
                         if cur_dist < closest_dist:
                             closest_dist = cur_dist
                             index = l
@@ -62,13 +78,10 @@ class ClusterBot(Client):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--ip', default='locahost', type=str)
+    parser.add_argument('--ip', default='127.0.0.1', type=str)
     parser.add_argument('--port', default=8000, type=int)
     parser.add_argument('--name', default='chirag-ojas', type=str)
     args = parser.parse_args()
 
-    host = args.ip
-    port = args.port
-    name = args.name
-    client = ClusterBot(host, port, name)
+    client = ClusterBot(args.ip, args.port, args.name)
     client.start()

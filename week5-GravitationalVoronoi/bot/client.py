@@ -1,4 +1,4 @@
-import socket, time, random, sys, math
+import socket, time, random, math
 import argparse
 
 
@@ -60,6 +60,7 @@ class Client:
     def start(self):
         while True:
             move_data = self.__receive_move()
+            print("Got move {}".format(move_data))
             # check if game is over
             if int(move_data[0]) == 1:
                 print("Game over")
@@ -99,14 +100,11 @@ class Client:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--ip', default='locahost', type=str)
+    parser.add_argument('--ip', default='127.0.0.1', type=str)
     parser.add_argument('--port', default=8000, type=int)
     parser.add_argument('--name', default='chirag-ojas', type=str)
     args = parser.parse_args()
 
-    host = args.ip
-    port = args.port
-    name = args.name
     # note: whoever connects to the server first plays first
-    client = Client(host, port, name)
+    client = Client(args.ip, args.port, args.name)
     client.start()
