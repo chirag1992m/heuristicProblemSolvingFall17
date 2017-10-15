@@ -70,10 +70,28 @@ class ClusterBot(Client):
         print("Took {} time to compute centroids.".format(time.time() - start_time))
         return centroids
 
+    def get_closest_valid_point(self, move_row, move_col):
+        radius = 47
+        tries = 0
+        while True:
+            new_move_row = random.randint(max(0, move_row-radius),
+                                          min(self.grid_size, move_row+radius))
+            new_move_col = random.randint(max(0, move_col-radius),
+                                          min(self.grid_size, move_col+radius))
+            if self._Client__is_valid_move(new_move_row, new_move_col):
+                break
+            tries += 1
+            if tries > 10:
+                radius *= 2
+                tries = 0
+        return new_move_row, new_move_col
+
     def get_move(self):
-        to_ret = self.cluster[self.current_move]
+        move_row, move_col = self.cluster[self.current_move]
+        if not self._Client__is_valid_move(move_row, move_col):
+            move_row, move_col = self.get_closest_valid_point(move_row, move_col)
         self.current_move += 1
-        return to_ret
+        return move_row, move_col
 
 
 if __name__ == "__main__":
