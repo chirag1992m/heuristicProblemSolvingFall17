@@ -42,7 +42,7 @@ class ClusterBot(Client):
         last = []
         turns = 0
         while last != centroids:
-            if turns > 10:
+            if turns > 100:
                 break
             turns += 1
             last = centroids
