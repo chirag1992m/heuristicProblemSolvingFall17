@@ -12,12 +12,12 @@ class ClusterBot(Client):
     def __init__(self, host, port, name):
         self.pre_calculate_clusters()
         super().__init__(host, port, name)
-        self.cluster = self.load_clusters(self.num_stones)
+        self.cluster = self.load_clusters(self.num_stone)
         self.current_move = 0
 
     @staticmethod
     def load_clusters(num_stones):
-        return pickle.load(open('cluster_bot_precomputed_{}.pkl'.format(num_stones), 'r'))
+        return pickle.load(open('cluster_bot_precomputed_{}.pkl'.format(num_stones), 'rb'))
 
     @staticmethod
     def pre_calculate_clusters():
@@ -85,3 +85,4 @@ if __name__ == "__main__":
 
     client = ClusterBot(args.ip, args.port, args.name)
     client.start()
+    print("Game over! Winner: {}".format(client.winner))
