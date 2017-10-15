@@ -1,4 +1,5 @@
 import socket, time, random, sys, math
+import argparse
 
 
 # implements a random bot
@@ -97,9 +98,15 @@ class Client:
 
 
 if __name__ == "__main__":
-    host = sys.argv[1]
-    port = int(sys.argv[2])
-    name = sys.argv[3]
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--ip', default='locahost', type=str)
+    parser.add_argument('--port', default=8000, type=int)
+    parser.add_argument('--name', default='chirag-ojas', type=str)
+    args = parser.parse_args()
+
+    host = args.ip
+    port = args.port
+    name = args.name
     # note: whoever connects to the server first plays first
     client = Client(host, port, name)
     client.start()

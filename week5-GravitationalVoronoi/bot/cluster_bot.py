@@ -1,10 +1,12 @@
+import time
 import math
 import random
-import sys
+import argparse
 from .client import Client
 
 
 class ClusterBot(Client):
+
     def __init__(self, host, port, name):
         super().__init__(host, port, name)
         self.cluster = self.compute_clusters()
@@ -17,6 +19,7 @@ class ClusterBot(Client):
         return math.sqrt(distance)
 
     def compute_clusters(self):
+        start_time = time.time()
         k = self.num_stone
         centroids = [[random.randint(0, 999), random.randint(0, 999)] for _ in range(k)]
         points = [[] for _ in range(k)]
@@ -48,6 +51,7 @@ class ClusterBot(Client):
                 new_clusters[l][0] = int(new_clusters[l][0])
                 new_clusters[l][1] = int(new_clusters[l][1])
             centroids = new_clusters
+        print("Took {} time to compute centroids.".format(time.time() - start_time))
         return centroids
 
     def get_move(self):
@@ -57,8 +61,14 @@ class ClusterBot(Client):
 
 
 if __name__ == "__main__":
-    host = sys.argv[1]
-    port = int(sys.argv[2])
-    name = sys.argv[3]
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--ip', default='locahost', type=str)
+    parser.add_argument('--port', default=8000, type=int)
+    parser.add_argument('--name', default='chirag-ojas', type=str)
+    args = parser.parse_args()
+
+    host = args.ip
+    port = args.port
+    name = args.name
     client = ClusterBot(host, port, name)
     client.start()
