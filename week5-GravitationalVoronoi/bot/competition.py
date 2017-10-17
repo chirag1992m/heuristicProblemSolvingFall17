@@ -1,15 +1,16 @@
 import argparse
 from client import Client
 from cluster_bot import ClusterBot
+from cluster_bot_2 import ClusterBot2
 import multiprocessing
 import time
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument("bot1", type=str,
-                    choices=['random', 'cluster'])
+                    choices=['random', 'cluster', 'cluster2'])
 parser.add_argument("bot2", type=str,
-                    choices=['random', 'cluster'])
+                    choices=['random', 'cluster', 'cluster2'])
 parser.add_argument('--times', default=5, type=int)
 parser.add_argument('--ip', default='127.0.0.1', type=str)
 parser.add_argument('--port', default=8000, type=int)
@@ -20,6 +21,8 @@ def get_bot(bot_type, arg):
         return Client(arg.ip, arg.port, bot_type)
     elif bot_type == 'cluster':
         return ClusterBot(arg.ip, arg.port, bot_type)
+    else:
+        return ClusterBot2(arg.ip, arg.port, bot_type)
 
 
 def run_bot1(arg, counter):
