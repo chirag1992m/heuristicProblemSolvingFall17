@@ -69,17 +69,17 @@ class ClusterBot(Client):
         return centroids
 
     def get_closest_valid_point(self, move_row, move_col):
-        radius = 47
+        radius = 1
         tries = 0
         while True:
             new_move_row = random.randint(max(0, move_row-radius),
-                                          min(self.grid_size, move_row+radius))
+                                          min(self.grid_size - 1, move_row+radius))
             new_move_col = random.randint(max(0, move_col-radius),
-                                          min(self.grid_size, move_col+radius))
+                                          min(self.grid_size - 1, move_col+radius))
             if self._Client__is_valid_move(new_move_row, new_move_col):
                 break
             tries += 1
-            if tries > 10:
+            if tries > 3:
                 radius *= 2
                 tries = 0
         return new_move_row, new_move_col

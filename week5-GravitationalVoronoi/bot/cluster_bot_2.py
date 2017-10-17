@@ -74,52 +74,20 @@ class ClusterBot2(Client):
         tries = 0
         while True:
             for i in range(self.num_stone):
-                if(self.used_clusters[i]==0):
+                if self.used_clusters[i] == 0:
                     move_row, move_col = self.cluster[i]
                     new_move_row = random.randint(max(0, move_row-radius),
-                                                  min(self.grid_size, move_row+radius))
+                                                  min(self.grid_size - 1, move_row+radius))
                     new_move_col = random.randint(max(0, move_col-radius),
-                                                  min(self.grid_size, move_col+radius))
+                                                  min(self.grid_size - 1, move_col+radius))
                     if self._Client__is_valid_move(new_move_row, new_move_col):
                         self.used_clusters[i] = 1
                         return new_move_row, new_move_col
 
             tries += 1
-            if tries > 10:
+            if tries > 5:
                 radius *= 2
                 tries = 0
-        return new_move_row, new_move_col
-        '''new_move_row = -1
-        new_move_col = -1
-        new_move_dist = 10000000
-        for i in range(1000):
-            for j in range(1000):
-                if(self._Client__is_valid_move(i, j)):
-                    closest_cluster = 1000000
-                    for temp_cluster in self.cluster:
-                        closest_cluster = min(closest_cluster, self.euclidean(temp_cluster, [i,j]))
-                    if(closest_cluster < new_move_dist):
-                        new_move_row = i
-                        new_move_col = j
-                        new_move_dist = closest_cluster
-        self.current_move += 1
-        return new_move_row, new_move_col'''
-
-    def get_closest_valid_point(self, move_row, move_col):
-        radius = 47
-        tries = 0
-        while True:
-            new_move_row = random.randint(max(0, move_row-radius),
-                                          min(self.grid_size, move_row+radius))
-            new_move_col = random.randint(max(0, move_col-radius),
-                                          min(self.grid_size, move_col+radius))
-            if self._Client__is_valid_move(new_move_row, new_move_col):
-                break
-            tries += 1
-            if tries > 10:
-                radius *= 2
-                tries = 0
-        return new_move_row, new_move_col
 
     def get_move(self):
         return self.get_next_move()
