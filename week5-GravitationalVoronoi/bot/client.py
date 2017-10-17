@@ -50,7 +50,7 @@ class Client:
 
     def __is_valid_move(self, move_row, move_col):
         for move in self.moves:
-            if self.__compute_distance(move_row, move_col, move[0], move[1]) < self.min_dist:
+            if self.__compute_distance(move_row, move_col, move[0], move[1]) <= self.min_dist:
                 return False
         return True
 
