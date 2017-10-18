@@ -47,14 +47,19 @@ A copy of the game has been provided [here](Gravitational_Voronoi.zip).
 ### [Random Bot](bot/client.py)
 It simply finds a `random` valid move and makes that.
 
-### [Cluster Bot](bot/cluster_bot.py)
+### [Sample N Bot](bot/sample_n_bot.py)
+It simply finds a set of `random` valid move and takes the one
+which gives the best score.
+
+### [Cluster Bot](bot/cluster_bot.py) - Winner Bot
 Find the most optimal points to put on the grid by K-Means clustering.
 If we find the optimal centroids of the grid, these centroid create
-the maximum pull. To win over such a board, the opponent needs to at 
+the maximum pull (by intuition). 
+To win over such a board, the opponent needs to at 
 least have 2 or more stones in every cluster to win over the board.
 But, a situation can easily arise where the centroid is already been 
 occupied by the opponent, in that case we find the random 
-nearest to centroid valid point.
+nearest to centroid valid point or the just use the next cluster point.
 
 To get the centroids, we run pre-computations.
 
