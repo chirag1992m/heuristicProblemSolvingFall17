@@ -1,8 +1,9 @@
 import numpy as np
+import visdom
 
 
 class GameInfo:
-    def __init__(self):
+    def __init__(self, visualize=False):
         self.time_left = None
         self.game_number = None
         self.tick = None
@@ -11,13 +12,16 @@ class GameInfo:
         self.box_size = (300, 300)
         self.wall_time = None
         self.hunter_pos = (0, 0)
-        self.hunter_velocity = (0, 0)
+        self.hunter_velocity = (1, 1)
         self.prey_pos = (230, 200)
         self.walls = []
-        self.box = self.get_game_grid()
+        self.figure, self.viz_win = None, None
+        if visualize:
+            self.figure = visdom.Visdom(env='evasion')
+        self.grid = self.get_game_grid()
 
     def get_game_grid(self):
-        grid = np.zeros(self.box_size, dtype=np.uint8)
+        grid = np.zeros(self.box_size, dtype=np.float32)
         # Put Hunter
         grid[self.hunter_pos] = 2
         # Put Prey
@@ -25,18 +29,53 @@ class GameInfo:
 
         # Put Walls
         for wall in self.walls:
+            print("Adding wall: {}".format(wall))
             if wall[0] == 0:
                 _, y, x1, x2 = wall
-                grid[x1:x2+1][y] = 1
+                grid[x1:x2+1, y] = 1
             elif wall[0] == 1:
                 _, x, y1, y2 = wall
-                grid[x][y1:y2+1] = 1
+                grid[x, y1:y2+1] = 1
             elif wall[0] == 2:
                 _, x1, x2, y1, y2, direction = wall
-                # Build the Diagonal Wall
+                if direction == 0:
+                    y = y1
+                    for x in range(x1, x2):
+                        grid[x][y] = 1
+                        if x != x2:
+                            grid[x+1][y] = 1
+                            y += 1
+                else:
+                    x = x1
+                    for y in range(y1, y2+1):
+                        grid[x][y] = 1
+                        if y != y2:
+                            grid[x][y+1] = 1
+                            x += 1
             else:
                 _, x1, x2, y1, y2, direction = wall
-                # Build the Counter-Diagonal Wall
+                if direction == 0:
+                    y = y1
+                    for x in range(x1, x2+1):
+                        grid[x][y] = 1
+                        if x != x2:
+                            grid[x+1][y] = 1
+                            y -= 1
+                else:
+                    y = y1
+                    for x in range(x1, x2+1):
+                        grid[x][y] = 1
+                        if x != x2:
+                            grid[x][y-1] = 1
+                            y -= 1
+        if self.figure:
+            colored_grid = np.ones((3, ) + grid.shape, dtype=np.float32)
+            colored_grid[:, grid == 1] = 0.
+            colored_grid[:, grid == 2] = 0.
+            colored_grid[0, grid == 2] = 1.
+            colored_grid[:, grid == 3] = 0.
+            colored_grid[2, grid == 3] = 1.
+            self.viz_win = self.figure.image(img=colored_grid, win=self.viz_win)
         return grid
 
     @staticmethod
@@ -86,3 +125,4 @@ class GameInfo:
         num_walls = all_info[14]
         wall_info = all_info[15:]
         self.walls = self.get_walls(num_walls, wall_info)
+        self.grid = self.get_game_grid()

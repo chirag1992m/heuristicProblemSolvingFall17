@@ -21,14 +21,14 @@ class BaseBot(object):
                 if v == val:
                     return k
 
-    def __init__(self, host, port, name):
+    def __init__(self, host, port, name, visualize=False):
         self.name = name
         self.host = host
         self.port = int(port)
 
         self.socket = self.make_connection()
         self.buffer = ""
-        self.game = GameInfo()
+        self.game = GameInfo(visualize=visualize)
         self.mode = self.Type.EMPTY
 
     def recv_current(self):
