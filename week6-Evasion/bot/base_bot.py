@@ -81,7 +81,7 @@ class BaseBot(object):
             self.send_to_game(move)
 
     def process_info(self, game_stat):
-        print(game_stat)
+        # print(game_stat)
         if game_stat == "done":
             self.mode = self.Type.DONE
         elif game_stat == "hunter":

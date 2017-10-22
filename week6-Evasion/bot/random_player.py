@@ -29,8 +29,9 @@ if __name__ == "__main__":
     parser.add_argument('--port', default=9001, type=int)
     parser.add_argument('--name', default='chirag-ojas', type=str)
     parser.add_argument('--viz', default=False, action='store_true')
+    parser.add_argument('--seed', default=42, type=int)
     args = parser.parse_args()
 
-    client = RandomBot(args.ip, args.port, args.name, visualize=args.viz)
+    client = RandomBot(args.ip, args.port, args.name, visualize=args.viz, seed=args.seed)
     client.start()
     client.done()
