@@ -19,3 +19,11 @@ A copy of the game has been provided [here](dancing-without-stars.zip).
 The instructions to run are given in README.md of the game directory.
 
 ## Bots
+
+- if C = 2, set of bipartite graphs (with parallel steps required as weight) 
+depending on the parallel moves you take. And, finding the minimum weight 
+bipartite match out of all the graphs.
+
+- for C > 2, the problem becomes C-dimensional matching with an even bigger set
+of possible graphs in the set and every problem is NP-hard! FUCK THIS SHIT!  I
+should have been a doctor!
