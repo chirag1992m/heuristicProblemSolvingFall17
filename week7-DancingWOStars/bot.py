@@ -3,6 +3,9 @@ import sys, random
 from client import Client
 from getopt import getopt, GetoptError
 from hopcroftkarp import HopcroftKarp
+import numpy
+import time
+
 
 """
 python3 sample_player.py -H <host> -p <port> <-c|-s>
@@ -21,8 +24,10 @@ def process_file(file_data, c, k):
       dd += 1
   return dancers
 
+
 def print_usage():
   print("Usage: python3 sample_player.py -H <host> -p <port>")
+
 
 def get_args():
   host = None
@@ -50,8 +55,10 @@ def get_args():
     sys.exit(2)
   return host, port, player
 
+
 def getDistance(point1, point2):
   return abs(point1[0] - point2[0]) + abs(point1[1] - point2[1])
+
 
 def match(stars, dancers, k):
   l = 0
@@ -76,6 +83,7 @@ def match(stars, dancers, k):
       l = m
   return l
 
+
 def get_score(stars, dancers, k, board_size, num_color):
   dd = [set() for i in range(num_color)]
   for dancer in dancers:
@@ -92,17 +100,53 @@ def in_dancers(dancers, x, y):
       return True
   return False
 
+
+def generate_distribution(dancers, k, board_size, num_color):
+  grid = [[0 for i in range(board_size)] for j in range(board_size)]
+  total = 0
+  for i in range(board_size):
+    for j in range(board_size):
+      if(in_dancers(dancers, i, j)):
+        continue
+      dist = {}
+      for dancer in dancers:
+        if(dancer[0] not in dist):
+          dist[dancer[0]] = 10000000000
+        dist[dancer[0]] = min(dist[dancer[0]], getDistance((dancer[1], dancer[2]), (i,j)))
+      score = 0
+      for col in dist:
+        score += 1/dist[col]
+      # print(dist)
+      grid[i][j] = score
+      total += score
+  points = []
+  probs = []
+  for i in range(board_size):
+    print(grid[i])
+    for j in range(board_size):
+      points.append(i*board_size + j)
+      probs.append(grid[i][j]/total)
+  # print(probs)
+  # print("")
+  # print(points)
+  return points, probs
+
+
 # TODO add your method here
 def get_stars(dancers, k, board_size, num_color):
+  points, prob = generate_distribution(dancers, k, board_size, num_color)
   final_stars = set()
-  for i in range(100):
+  best_score = 10000000000000
+  start_time = time.time()
+  while(time.time() - start_time < 100):
     stars = set()
-    best_score = 10000000000000
     x = -1
     y = -1
     while len(stars) < k:
-      x = random.randint(0, board_size - 1)
-      y = random.randint(0, board_size - 1)
+      pt = numpy.random.choice(points,1,False, prob)
+      y = int(pt % board_size)
+      pt -= y
+      x = int(pt/board_size)
       if not in_dancers(dancers, x, y) and (x, y) not in stars:
         # check manhattan distance with other stars
         ok_to_add = True
@@ -117,10 +161,31 @@ def get_stars(dancers, k, board_size, num_color):
     if(temp_score < best_score):
       best_score = temp_score
       final_stars = stars
+  stars = set()
+  counter = -1
+  srtd = [x for _,x in sorted(zip(prob, points))]
+  srtd = srtd[::-1]
+  while(len(stars) < k):
+    counter += 1
+    x = srtd[counter]
+    y = x%board_size
+    x -= y
+    x = int(x/board_size)
+    if not in_dancers(dancers, x, y ) and (x, y) not in stars:
+      ok_to_add = True
+      for s in stars:
+        if abs(x - s[0]) + abs(y - s[1]) < num_color + 1:
+          ok_to_add = False
+          break
+      if ok_to_add:
+        stars.add((x, y))
+  if(get_score(stars, dancers, k, board_size, num_color) < best_score):
+    final_stars = stars
   stars_str = ""
   for s in final_stars:
     stars_str += (str(s[0]) + " " + str(s[1]) + " ")
   return stars_str
+
 
 # TODO add your method here
 def get_a_move(dancers, stars, k, board_size, num_color):
@@ -148,6 +213,7 @@ def get_a_move(dancers, stars, k, board_size, num_color):
       moved.add((x2, y2))
       count += 1
   return "5 " + move
+
 
 def main():
   host, port, player = get_args()
