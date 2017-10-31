@@ -229,7 +229,63 @@ class SamplingBot(BaseBot):
                     print("FUCK!!!")
                     continue
                 position_mapping.append((dancer, best_point))
+        moves = self.get_all_moves(mapping)
         print(position_mapping)
+
+    def get_next_moves(self, init_pos, final_pos):
+        new_grid = [[0 for _ in range(self.board_size)] for _ in range(self.board_size)]
+        for star in self.stars:
+            new_grid[star[0]][star[1]] = 1
+        result = [] #omitting dancers which don't move. Return this to server
+        result2 = [] #without omission. This will be used as the next positions of the dancers
+        for i in range(len(init_pos)):
+            cur = init_pos[i]
+            fin = final_pos[i]
+            deltaX = -1
+            deltaY = -1
+            if(fin[0] > cur[0]):
+                deltaX = 1
+            elif(fin[0] == cur[0]):
+                deltaX = 0
+            if(fin[1] > cur[1]):
+                deltaY = 1
+            elif(fin[1] == cur[1]):
+                deltaY = 0
+            new_pos = cur
+            if(deltaY != 0 and new_grid[cur[0]][cur[1] + deltaY] == 0):
+                new_pos = (cur[0], cur[0] + deltaY)
+            elif(deltaX != 0 and new_grid[cur[0] + deltaX][cur[1]] == 0):
+                new_pos = (cur[0] + deltaX, cur[0])
+            else:
+                if(deltaX == 0 and cur != fin and (cur[0],cur[1] + deltaY) in self.stars):
+                    if(new_grid[cur[0]+1][cur[1]] == 0):
+                        new_pos = (cur[0]+1, cur[1])
+                    elif(new_grid[cur[0]-1][cur[1]] == 0):
+                        new_pos = (cur[0] - 1, cur[1])
+                elif(deltaY == 0 and cur != fin and (cur[0] + deltaX,cur[1]) in self.stars):
+                    if(new_grid[cur[0]][cur[1]+1] == 0):
+                        new_pos = (cur[0], cur[1]+1)
+                    elif(new_grid[cur[0]][cur[1]-1] == 0):
+                        new_pos = (cur[0], cur[1]-1)
+            if(new_pos != cur):
+                new_grid[new_pos[0]][new_pos[1]] = 1
+                result.append((cur, new_pos))
+            result2.append((cur, new_pos))
+        return result, result2
+
+    def get_all_moves(self, mapping):
+        init_pos = []
+        final_pos = []
+        for ((pos1, pos2) in mapping):
+            init_pos.append(pos1)
+            final_pos.append(pos2)
+        cur_pos = init_pos
+        moves = []
+        while(cur_pos != final_pos):
+            returnThis, next_pos = self.get_next_moves(cur_pos, final_pos)
+            cur_pos = next_pos
+            moves.append(returnThis)
+        return moves
 
 
 if __name__ == "__main__":
