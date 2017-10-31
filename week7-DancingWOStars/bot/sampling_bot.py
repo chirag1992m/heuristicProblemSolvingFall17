@@ -229,8 +229,8 @@ class SamplingBot(BaseBot):
                     print("FUCK!!!")
                     continue
                 position_mapping.append((dancer, best_point))
-        moves = self.get_all_moves(mapping)
-        print(position_mapping)
+        moves = self.get_all_moves(position_mapping)
+        return moves
 
     def get_next_moves(self, init_pos, final_pos):
         new_grid = [[0 for _ in range(self.board_size)] for _ in range(self.board_size)]
@@ -276,7 +276,7 @@ class SamplingBot(BaseBot):
     def get_all_moves(self, mapping):
         init_pos = []
         final_pos = []
-        for ((pos1, pos2) in mapping):
+        for (pos1, pos2) in mapping:
             init_pos.append(pos1)
             final_pos.append(pos2)
         cur_pos = init_pos
