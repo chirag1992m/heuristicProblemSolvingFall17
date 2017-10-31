@@ -12,7 +12,7 @@ class BaseBot(object):
 
         self.board_size, self.colors, self.dancer_count = self.get_parameters()
         self.dancers = self.process(self.client.receive())
-        self.stars = None
+        self.stars = []
 
     def get_parameters(self):
         parameters = self.client.receive()
@@ -119,12 +119,15 @@ class BaseBot(object):
                                                          "received dancers: {}".format(dancers)
         return dancers
 
+    def get_manhattan_distance(self, point1, point2):
+        return abs(point1[0] - point2[0]) + abs(point1[1] - point2[1])
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--host', default='127.0.0.1', type=str)
     parser.add_argument('--port', default=9000, type=int)
-    parser.add_argument('--name', default='OC', type=str)
+    parser.add_argument('--name', default='CO', type=str)
     parser.add_argument('--spoiler', default=False, action='store_true')
 
     args = parser.parse_args()
