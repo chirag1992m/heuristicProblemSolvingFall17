@@ -134,7 +134,7 @@ class SamplingBot(BaseBot):
         return list(final_stars), best_matchings
 
     def put_stars(self):
-        self.stars, _ = self.get_probable_centers(10)
+        self.stars, _ = self.get_probable_centers(1)
 
     def get_positions(self, centers, matchings):
         points_available = {}
@@ -161,7 +161,7 @@ class SamplingBot(BaseBot):
                     if (start, y) in self.stars and (end, y) in self.stars:
                         break
                 if empty_cells == self.colors:
-                    points_to_add = [(i, y) for i in range(start, end)]
+                    points_to_add = [(i, y) for i in range(start, end+1)]
                     point_already_present = False
                     for point, _ in points_to_add:
                         if point in all_points:
@@ -187,7 +187,7 @@ class SamplingBot(BaseBot):
                     if (x, start) in self.stars and (x, end) in self.stars:
                         break
                 if empty_cells == self.colors:
-                    points_to_add = [(y, i) for i in range(start, end)]
+                    points_to_add = [(y, i) for i in range(start, end+1)]
                     point_already_present = False
                     for point, _ in points_to_add:
                         if point in all_points:
@@ -204,11 +204,18 @@ class SamplingBot(BaseBot):
                                             new_center[0] + x1)), \
                                  max(0, min(self.board_size-1,
                                             new_center[1] + y1))
-        # print(points_available)
+        print(len(centers))
+        print(len(points_available.keys()))
+        print(self.colors)
+        print(len(self.dancers.keys()))
         count = 0
         for x in points_available.keys():
             count += len(points_available[x])
-        print(count)
+        count2 = 0
+        for x in self.dancers.keys():
+            count2 += len(self.dancers[x])
+        print("Count: {}, dancers: {}".format(count, count2))
+        # exit()
         return points_available
 
     def get_parallel_moves(self):
@@ -229,8 +236,17 @@ class SamplingBot(BaseBot):
                     print("FUCK!!!")
                     continue
                 position_mapping.append((dancer, best_point))
-        moves = self.get_all_moves(position_mapping)
-        return moves
+        init_pos = []
+        final_pos = []
+        for (pos1, pos2) in position_mapping:
+            init_pos.append(pos1)
+            final_pos.append(pos2)
+        cur_pos = init_pos
+        moves = []
+        while (cur_pos != final_pos):
+            returnThis, next_pos = self.get_next_moves(cur_pos, final_pos)
+            cur_pos = next_pos
+            yield returnThis
 
     def get_next_moves(self, init_pos, final_pos):
         new_grid = [[0 for _ in range(self.board_size)] for _ in range(self.board_size)]
@@ -243,6 +259,7 @@ class SamplingBot(BaseBot):
             fin = final_pos[i]
             deltaX = -1
             deltaY = -1
+            # print(fin, cur)
             if(fin[0] > cur[0]):
                 deltaX = 1
             elif(fin[0] == cur[0]):
@@ -253,9 +270,9 @@ class SamplingBot(BaseBot):
                 deltaY = 0
             new_pos = cur
             if(deltaY != 0 and new_grid[cur[0]][cur[1] + deltaY] == 0):
-                new_pos = (cur[0], cur[0] + deltaY)
+                new_pos = (cur[0], cur[1] + deltaY)
             elif(deltaX != 0 and new_grid[cur[0] + deltaX][cur[1]] == 0):
-                new_pos = (cur[0] + deltaX, cur[0])
+                new_pos = (cur[0] + deltaX, cur[1])
             else:
                 if(deltaX == 0 and cur != fin and (cur[0],cur[1] + deltaY) in self.stars):
                     if(new_grid[cur[0]+1][cur[1]] == 0):
@@ -270,22 +287,8 @@ class SamplingBot(BaseBot):
             if(new_pos != cur):
                 new_grid[new_pos[0]][new_pos[1]] = 1
                 result.append((cur, new_pos))
-            result2.append((cur, new_pos))
+            result2.append(new_pos)
         return result, result2
-
-    def get_all_moves(self, mapping):
-        init_pos = []
-        final_pos = []
-        for (pos1, pos2) in mapping:
-            init_pos.append(pos1)
-            final_pos.append(pos2)
-        cur_pos = init_pos
-        moves = []
-        while(cur_pos != final_pos):
-            returnThis, next_pos = self.get_next_moves(cur_pos, final_pos)
-            cur_pos = next_pos
-            moves.append(returnThis)
-        return moves
 
 
 if __name__ == "__main__":

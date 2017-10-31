@@ -13,6 +13,7 @@ class BaseBot(object):
         self.board_size, self.colors, self.dancer_count = self.get_parameters()
         self.dancers = self.process(self.client.receive())
         self.stars = []
+        self.lines_info = []
 
     def get_parameters(self):
         parameters = self.client.receive()
@@ -75,9 +76,7 @@ class BaseBot(object):
             to_send = ' '.join(string_builder)
             print("Sending move: " + to_send)
             self.client.send(to_send)
-            self.client.send("DONE")
-            # send a random line, WTF?
-            self.client.send("Random ending line")
+        self.client.send("DONE")
 
     def send_stars(self):
         string_builder = []
@@ -101,6 +100,7 @@ class BaseBot(object):
         if self.role == 'choreographer':
             self.stars = self.get_stars_from_server()
             self.send_parallel_moves(self.get_parallel_moves())
+            self.client.send(' '.join(self.lines_info))
         else:
             self.put_stars()
             self.send_stars()
