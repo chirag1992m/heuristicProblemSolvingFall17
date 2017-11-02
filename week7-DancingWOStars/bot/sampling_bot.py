@@ -134,7 +134,7 @@ class SamplingBot(BaseBot):
         return list(final_stars), best_matchings
 
     def put_stars(self):
-        self.stars, _ = self.get_probable_centers(1)
+        self.stars, _ = self.get_probable_centers(100)
 
     def get_positions(self, centers, matchings):
         points_available = {}
@@ -210,6 +210,9 @@ class SamplingBot(BaseBot):
         print(len(self.dancers.keys()))
         count = 0
         for x in points_available.keys():
+            while len(points_available[x]) > self.colors:
+                print("wtf!")
+                points_available[x].pop()
             count += len(points_available[x])
         count2 = 0
         for x in self.dancers.keys():
@@ -219,7 +222,7 @@ class SamplingBot(BaseBot):
         return points_available
 
     def get_parallel_moves(self):
-        centers, matchings = self.get_probable_centers(-1)
+        centers, matchings = self.get_probable_centers(50)
         points_available = self.get_positions(centers, matchings)
         position_mapping = []
         availability = {}
@@ -236,27 +239,40 @@ class SamplingBot(BaseBot):
                     print("FUCK!!!")
                     continue
                 position_mapping.append((dancer, best_point))
+        for center in points_available.keys():
+            self.lines_info.append(str(points_available[center][0][0]))
+            self.lines_info.append(str(points_available[center][0][1]))
+            self.lines_info.append(str(points_available[center][self.colors-1][0]))
+            self.lines_info.append(str(points_available[center][self.colors-1][1]))
         init_pos = []
         final_pos = []
         for (pos1, pos2) in position_mapping:
             init_pos.append(pos1)
             final_pos.append(pos2)
         cur_pos = init_pos
-        moves = []
+        dir = [random.randint(0, 1) for _ in range(len(cur_pos))]
         while (cur_pos != final_pos):
-            returnThis, next_pos = self.get_next_moves(cur_pos, final_pos)
+            returnThis, next_pos, dd = self.get_next_moves(cur_pos, final_pos, dir)
             cur_pos = next_pos
+            dir = dd
             yield returnThis
 
-    def get_next_moves(self, init_pos, final_pos):
+    def get_next_moves(self, init_pos, final_pos, dir):
         new_grid = [[0 for _ in range(self.board_size)] for _ in range(self.board_size)]
         for star in self.stars:
             new_grid[star[0]][star[1]] = 1
+        for pos in init_pos:
+            new_grid[pos[0]][pos[1]] = 1
         result = [] #omitting dancers which don't move. Return this to server
         result2 = [] #without omission. This will be used as the next positions of the dancers
         for i in range(len(init_pos)):
             cur = init_pos[i]
             fin = final_pos[i]
+            dd = dir[i]
+            if(cur == fin):
+                new_grid[cur[0]][cur[1]] = 1
+                continue
+            print(cur, fin, dd)
             deltaX = -1
             deltaY = -1
             # print(fin, cur)
@@ -269,26 +285,56 @@ class SamplingBot(BaseBot):
             elif(fin[1] == cur[1]):
                 deltaY = 0
             new_pos = cur
-            if(deltaY != 0 and new_grid[cur[0]][cur[1] + deltaY] == 0):
-                new_pos = (cur[0], cur[1] + deltaY)
-            elif(deltaX != 0 and new_grid[cur[0] + deltaX][cur[1]] == 0):
-                new_pos = (cur[0] + deltaX, cur[1])
-            else:
-                if(deltaX == 0 and cur != fin and (cur[0],cur[1] + deltaY) in self.stars):
-                    if(new_grid[cur[0]+1][cur[1]] == 0):
-                        new_pos = (cur[0]+1, cur[1])
-                    elif(new_grid[cur[0]-1][cur[1]] == 0):
-                        new_pos = (cur[0] - 1, cur[1])
-                elif(deltaY == 0 and cur != fin and (cur[0] + deltaX,cur[1]) in self.stars):
-                    if(new_grid[cur[0]][cur[1]+1] == 0):
-                        new_pos = (cur[0], cur[1]+1)
-                    elif(new_grid[cur[0]][cur[1]-1] == 0):
-                        new_pos = (cur[0], cur[1]-1)
-            if(new_pos != cur):
+            if(dd == 0):
+                if(deltaY != 0 and cur[1]+deltaY >=0 and cur[1]+deltaY < self.board_size and new_grid[cur[0]][cur[1] + deltaY] == 0):
+                    new_pos = (cur[0], cur[1] + deltaY)
+                elif(deltaX != 0 and cur[0]+deltaX >=0 and cur[0]+deltaX < self.board_size and new_grid[cur[0] + deltaX][cur[1]] == 0):
+                    new_pos = (cur[0] + deltaX, cur[1])
+                else:
+                    if(deltaX == 0 and cur != fin and cur[1]+deltaY >=0 and cur[1]+deltaY < self.board_size  and (cur[0],cur[1] + deltaY) in self.stars):
+                        if(cur[0] + 1 < self.board_size and new_grid[cur[0]+1][cur[1]] == 0):
+                            new_pos = (cur[0]+1, cur[1])
+                            dir[i] = 0
+                        elif(cur[0] - 1 >=0 and new_grid[cur[0]-1][cur[1]] == 0):
+                            new_pos = (cur[0] - 1, cur[1])
+                            dir[i] = 0
+                    elif(deltaY == 0 and cur != fin and cur[0]+deltaX >=0 and cur[0]+deltaX < self.board_size and (cur[0] + deltaX,cur[1]) in self.stars):
+                        if(cur[1] + 1 < self.board_size and new_grid[cur[0]][cur[1]+1] == 0):
+                            new_pos = (cur[0], cur[1]+1)
+                            dir[i] = 1
+                        elif(cur[1] - 1>=0 and new_grid[cur[0]][cur[1]-1] == 0):
+                            new_pos = (cur[0], cur[1]-1)
+                            dir[i] = 1
                 new_grid[new_pos[0]][new_pos[1]] = 1
-                result.append((cur, new_pos))
-            result2.append(new_pos)
-        return result, result2
+                if(new_pos != cur):
+                    result.append((cur, new_pos))
+                result2.append(new_pos)
+            else:
+                if(deltaX != 0 and cur[0]+deltaX >=0 and cur[0]+deltaX < self.board_size and new_grid[cur[0] + deltaX][cur[1]] == 0):
+                    new_pos = (cur[0] + deltaX, cur[1])
+                elif(deltaY != 0 and new_grid[cur[0]][cur[1] + deltaY] == 0):
+                    new_pos = (cur[0], cur[1] + deltaY)
+                else:
+                    if(deltaY == 0 and cur != fin and cur[0]+deltaX >=0 and cur[0]+deltaX < self.board_size and (cur[0] + deltaX,cur[1]) in self.stars):
+                        if(cur[1] + 1 < self.board_size and new_grid[cur[0]][cur[1]+1] == 0):
+                            new_pos = (cur[0], cur[1]+1)
+                            dir[i] = 1
+                        elif(cur[1] - 1 >=0 and new_grid[cur[0]][cur[1]-1] == 0):
+                            new_pos = (cur[0], cur[1]-1)
+                            dir[i] = 1
+                    elif(deltaX == 0 and cur != fin and cur[1]+deltaY >=0 and cur[1]+deltaY < self.board_size  and (cur[0],cur[1] + deltaY) in self.stars):
+                        if(cur[0] + 1 < self.board_size and new_grid[cur[0]+1][cur[1]] == 0):
+                            new_pos = (cur[0]+1, cur[1])
+                            dir[i] = 0
+                        elif(cur[0] -1 >= 0 and new_grid[cur[0]-1][cur[1]] == 0):
+                            new_pos = (cur[0] - 1, cur[1])
+                            dir[i] = 0
+                new_grid[new_pos[0]][new_pos[1]] = 1
+                if(new_pos != cur):
+                    result.append((cur, new_pos))
+                result2.append(new_pos)
+
+        return result, result2, dir
 
 
 if __name__ == "__main__":
@@ -300,7 +346,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    random.seed(42)
+    random.seed(234)
 
     if args.spoiler:
         bot = SamplingBot(args.host, args.port, args.name, 'spoiler')

@@ -67,7 +67,10 @@ class BaseBot(object):
                     self.stars.append((x, y))
 
     def send_parallel_moves(self, all_moves):
+        # count = 0
         for parallel_move in all_moves:
+            if len(parallel_move) == 0:
+                break
             string_builder = [str(len(parallel_move))]
             for start, end in parallel_move:
                 x_1, y_1 = tuple(map(str, start))
@@ -76,6 +79,9 @@ class BaseBot(object):
             to_send = ' '.join(string_builder)
             print("Sending move: " + to_send)
             self.client.send(to_send)
+            # count += 1
+            # if count > 1000:
+            #     break
         self.client.send("DONE")
 
     def send_stars(self):
