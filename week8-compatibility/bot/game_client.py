@@ -24,6 +24,10 @@ class GameClient(object):
                        game_params['pairs'])
         self.parameters, self.pairs = self.parse_problem(self.get_problem())
 
+    def set_player(self, player_role):
+        self.player_role = player_role
+        self.parameters, self.pairs = self.parse_problem(self.get_problem())
+
     def start(self, num_packages, num_versions, num_compatibilities):
         self.create_game(num_packages, num_versions, num_compatibilities)
         self.register_game()
@@ -37,6 +41,7 @@ class GameClient(object):
             with urlopen(req) as response:
                 the_page = response.read()
                 response = json.loads(the_page.decode())
+                print(response)
                 if response['success']:
                     return response
                 else:
@@ -138,29 +143,35 @@ class GameClient(object):
 
     def play(self):
         if self.player_role == 'poser':
+            print("Running Poser...")
             self.pairs, configurations = self.poser()
             string_builder = [str(len(self.pairs))]
             for pair in self.pairs:
-                p1 = ' '.join(pair[0])
-                p2 = ' '.join(pair[1])
+                p1 = ' '.join(map(str, pair[0]))
+                p2 = ' '.join(map(str, pair[1]))
                 string_builder.append(' '.join([p1, p2]))
             string_builder.append(str(len(configurations)))
             for conf in configurations:
-                string_builder.append(' '.join(conf))
-            self.submit_solution('\n'.join(string_builder))
+                string_builder.append(' '.join(map(str, conf)))
+            to_send = '\n'.join(string_builder)
+            print(to_send)
+            self.submit_solution(to_send)
         elif self.player_role == 'solver':
+            print("Running Solver...")
             configurations = self.solver()
             string_builder = [str(len(configurations))]
             for conf in configurations:
-                string_builder.append(' '.join(conf))
-            self.submit_solution('\n'.join(string_builder))
+                string_builder.append(' '.join(map(str, conf)))
+            to_send = '\n'.join(string_builder)
+            print(to_send)
+            self.submit_solution(to_send)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--host', default='localhost', type=str)
     parser.add_argument('--port', default=34567, type=int)
-    parser.add_argument('--player', default='poser', type=str)
+    parser.add_argument('--player', default='both', type=str)
     parser.add_argument('--game-id', default=None, type=int)
     parser.add_argument('--access-code', default=None, type=str)
     parser.add_argument('--packages', default=1, type=int)
@@ -173,10 +184,18 @@ if __name__ == "__main__":
                             args.player, 'CO',
                             {'game_id': args.game_id,
                              'access_code': args.access_code})
+    elif args.player == 'both':
+        client = GameClient(args.host, args.port,
+                            'poser', 'CO',
+                            {'packages': args.packages,
+                             'versions': args.versions,
+                             'pairs': args.pairs})
+        client.play()
+        client.set_player('solver')
+        client.play()
     else:
         client = GameClient(args.host, args.port,
                             args.player, 'CO',
                             {'packages': args.packages,
                              'versions': args.versions,
                              'pairs': args.pairs})
-    client.play()
