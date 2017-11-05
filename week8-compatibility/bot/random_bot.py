@@ -50,18 +50,21 @@ if __name__ == "__main__":
     parser.add_argument('--host', default='localhost', type=str)
     parser.add_argument('--port', default=34567, type=int)
     parser.add_argument('--player', default='both', type=str)
+    parser.add_argument('--problem-id', default=None, type=str)
     parser.add_argument('--game-id', default=None, type=int)
-    parser.add_argument('--access-code', default=None, type=str)
-    parser.add_argument('--packages', default=2, type=int)
-    parser.add_argument('--versions', default=3, type=int)
-    parser.add_argument('--pairs', default=5, type=int)
+    parser.add_argument('--access-code', default=None, type=int)
+    parser.add_argument('--packages', default=1, type=int)
+    parser.add_argument('--versions', default=1, type=int)
+    parser.add_argument('--pairs', default=1, type=int)
 
     args = parser.parse_args()
     if args.game_id and args.access_code:
         client = RandomBot(args.host, args.port,
                            args.player, 'CO',
                            {'game_id': args.game_id,
-                            'access_code': args.access_code})
+                            'access_code': args.access_code,
+                            'problem_id': args.problem_id})
+        client.play()
     elif args.player == 'both':
         client = RandomBot(args.host, args.port,
                            'poser', 'CO',
@@ -69,11 +72,11 @@ if __name__ == "__main__":
                             'versions': args.versions,
                             'pairs': args.pairs})
         client.play()
-        client.set_player('solver')
-        client.play()
+        client.play_as_solver()
     else:
         client = RandomBot(args.host, args.port,
                            args.player, 'CO',
                            {'packages': args.packages,
                             'versions': args.versions,
                             'pairs': args.pairs})
+        client.play()

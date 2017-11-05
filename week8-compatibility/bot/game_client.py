@@ -14,23 +14,27 @@ class GameClient(object):
                  game_params):
         self.base = 'http://' + server_address + ':' + str(server_port) + '/api/'
         self.player_role = player_role
-        self.player_id = player_name
+        self.player_name = player_name
         if 'access_code' in game_params:
             self.access_code = game_params['access_code']
             self.game_id = game_params['game_id']
+            self.problem_id = game_params['problem_id']
         else:
             self.start(game_params['packages'],
                        game_params['versions'],
                        game_params['pairs'])
         self.parameters, self.pairs = self.parse_problem(self.get_problem())
 
-    def set_player(self, player_role):
-        self.player_role = player_role
+    def play_as_solver(self):
+        self.player_role = 'solver'
+        self.register_game(self.player_name + self.player_role)
         self.parameters, self.pairs = self.parse_problem(self.get_problem())
+        self.play()
 
     def start(self, num_packages, num_versions, num_compatibilities):
         self.create_game(num_packages, num_versions, num_compatibilities)
-        self.register_game()
+        self.register_game(self.player_name)
+        self.problem_id = self.player_name
 
     def make_request(self, api_name, params, body=None):
         try:
@@ -70,10 +74,10 @@ class GameClient(object):
             print("Couldn\'t create game. Exiting!")
             exit()
 
-    def register_game(self):
+    def register_game(self, player_id):
         params = {
             'id': self.game_id,
-            'name': self.player_id
+            'name': player_id
         }
         response = self.make_request('register', params)
         if response:
@@ -85,7 +89,7 @@ class GameClient(object):
     def get_problem(self):
         params = {
             'id': self.game_id,
-            'pid': self.player_id,
+            'pid': self.problem_id,
             'role': self.player_role,
             'code': self.access_code
         }
@@ -104,9 +108,10 @@ class GameClient(object):
             problem = problem.split('\n')[0]
             parameters = tuple(map(int, problem.split(' ')))
         elif self.player_role == 'solver':
+            print(problem)
             problem = problem.split('\n')
             parameters = tuple(map(int, problem[0].split(' ')))
-            for i in range(1, len(problem)):
+            for i in range(1, len(problem) - 1):
                 p1, v1, p2, v2 = tuple(map(int, problem[i].split()))
                 pairs.append(((p1, v1), (p2, v2)))
         else:
@@ -120,25 +125,23 @@ class GameClient(object):
     def submit_solution(self, solution):
         params = {
             'id': self.game_id,
-            'pid': self.player_id,
+            'pid': self.problem_id,
             'role': self.player_role,
             'code': self.access_code
         }
         payload = {'data': solution}
         response = self.make_request('submit', params, payload)
-        if response:
-            print(response)
-        else:
+        if not response:
             print("Can\'t submit solution! Exiting!")
             exit()
 
     def poser(self):
         pairs = []
-        valid_configurations = [[]]
+        valid_configurations = []
         return pairs, valid_configurations
 
     def solver(self):
-        valid_configurations = [[]]
+        valid_configurations = []
         return valid_configurations
 
     def play(self):
@@ -172,8 +175,9 @@ if __name__ == "__main__":
     parser.add_argument('--host', default='localhost', type=str)
     parser.add_argument('--port', default=34567, type=int)
     parser.add_argument('--player', default='both', type=str)
+    parser.add_argument('--problem-id', default=None, type=str)
     parser.add_argument('--game-id', default=None, type=int)
-    parser.add_argument('--access-code', default=None, type=str)
+    parser.add_argument('--access-code', default=None, type=int)
     parser.add_argument('--packages', default=1, type=int)
     parser.add_argument('--versions', default=1, type=int)
     parser.add_argument('--pairs', default=1, type=int)
@@ -183,7 +187,9 @@ if __name__ == "__main__":
         client = GameClient(args.host, args.port,
                             args.player, 'CO',
                             {'game_id': args.game_id,
-                             'access_code': args.access_code})
+                             'access_code': args.access_code,
+                             'problem_id': args.problem_id})
+        client.play()
     elif args.player == 'both':
         client = GameClient(args.host, args.port,
                             'poser', 'CO',
@@ -191,11 +197,11 @@ if __name__ == "__main__":
                              'versions': args.versions,
                              'pairs': args.pairs})
         client.play()
-        client.set_player('solver')
-        client.play()
+        client.play_as_solver()
     else:
         client = GameClient(args.host, args.port,
                             args.player, 'CO',
                             {'packages': args.packages,
                              'versions': args.versions,
                              'pairs': args.pairs})
+        client.play()
