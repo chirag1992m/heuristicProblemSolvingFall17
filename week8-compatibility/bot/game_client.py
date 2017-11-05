@@ -1,3 +1,4 @@
+import argparse
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 from datetime import datetime, timedelta
@@ -35,7 +36,12 @@ class GameClient(object):
                           data=body if body is None else body.encode('ascii'))
             with urlopen(req) as response:
                 the_page = response.read()
-                return json.loads(the_page.decode())
+                response = json.loads(the_page.decode())
+                if response['success']:
+                    return response
+                else:
+                    print("Some error with server: {}".format(response['msg']))
+                    exit()
         except Exception as e:
             print(e)
             exit()
@@ -151,9 +157,26 @@ class GameClient(object):
 
 
 if __name__ == "__main__":
-    client = GameClient('localhost', 34567,
-                        'poser', 'CO',
-                        {'packages': 1,
-                         'versions': 1,
-                         'pairs': 10})
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--host', default='localhost', type=str)
+    parser.add_argument('--port', default=34567, type=int)
+    parser.add_argument('--player', default='poser', type=str)
+    parser.add_argument('--game-id', default=None, type=int)
+    parser.add_argument('--access-code', default=None, type=str)
+    parser.add_argument('--packages', default=1, type=int)
+    parser.add_argument('--versions', default=1, type=int)
+    parser.add_argument('--pairs', default=1, type=int)
+
+    args = parser.parse_args()
+    if args.game_id and args.access_code:
+        client = GameClient(args.host, args.port,
+                            args.player, 'CO',
+                            {'game_id': args.game_id,
+                             'access_code': args.access_code})
+    else:
+        client = GameClient(args.host, args.port,
+                            args.player, 'CO',
+                            {'packages': args.packages,
+                             'versions': args.versions,
+                             'pairs': args.pairs})
     client.play()
