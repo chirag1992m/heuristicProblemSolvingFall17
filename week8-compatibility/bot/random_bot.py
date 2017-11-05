@@ -26,22 +26,22 @@ class RandomBot(GameClient):
             v2 = random.randint(1, self.parameters['versions'])
             self.pairs.append(((p1, v1), (p2, v2)))
         configuration = []
-        for i in range(1, self.parameters['packages'] + 1):
-            p = i
-            v = random.randint(1, self.parameters['versions'])
-            configuration.append((p, v))
+        for i in range(random.randint(1, 5)):
+            config = []
+            for k in range(1, self.parameters['packages'] + 1):
+                v = random.randint(1, self.parameters['versions'])
+                config.append(v)
+            configuration.append(config)
         return self.pairs, configuration
 
     def solver(self):
         configuration = []
-        for pair in self.pairs:
-            choice = random.randint(1, 3)
-            if choice == 1:
-                configuration.append(pair[0])
-            elif choice == 2:
-                configuration.append(pair[1])
-            else:
-                continue
+        for i in range(random.randint(1, 5)):
+            config = []
+            for k in range(1, self.parameters['packages'] + 1):
+                v = random.randint(1, self.parameters['versions'])
+                config.append(v)
+            configuration.append(config)
         return configuration
 
 

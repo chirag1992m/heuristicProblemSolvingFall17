@@ -1,6 +1,6 @@
 import argparse
 from urllib.parse import urlencode
-from urllib.request import Request, urlopen
+import requests
 from datetime import datetime, timedelta
 import json
 
@@ -35,18 +35,17 @@ class GameClient(object):
     def make_request(self, api_name, params, body=None):
         try:
             url = self.base + api_name + '?' + urlencode(params)
-            req = Request(url=url,
-                          method='GET' if body is None else 'POST',
-                          data=body if body is None else body.encode('ascii'))
-            with urlopen(req) as response:
-                the_page = response.read()
-                response = json.loads(the_page.decode())
-                print(response)
-                if response['success']:
-                    return response
-                else:
-                    print("Some error with server: {}".format(response['msg']))
-                    exit()
+            if body:
+                response = requests.post(url, data=body)
+            else:
+                response = requests.get(url)
+            response = json.loads(response.content)
+            print(response)
+            if response['success']:
+                return response
+            else:
+                print("Some error with server: {}".format(response['msg']))
+                exit()
         except Exception as e:
             print(e)
             exit()
@@ -103,10 +102,10 @@ class GameClient(object):
         pairs = []
         if self.player_role == 'poser':
             problem = problem.split('\n')[0]
-            parameters = problem.split(' ')
+            parameters = tuple(map(int, problem.split(' ')))
         elif self.player_role == 'solver':
             problem = problem.split('\n')
-            parameters = problem[0].split(' ')
+            parameters = tuple(map(int, problem[0].split(' ')))
             for i in range(1, len(problem)):
                 p1, v1, p2, v2 = tuple(map(int, problem[i].split()))
                 pairs.append(((p1, v1), (p2, v2)))
@@ -125,7 +124,8 @@ class GameClient(object):
             'role': self.player_role,
             'code': self.access_code
         }
-        response = self.make_request('submit', params, solution)
+        payload = {'data': solution}
+        response = self.make_request('submit', params, payload)
         if response:
             print(response)
         else:
@@ -134,11 +134,11 @@ class GameClient(object):
 
     def poser(self):
         pairs = []
-        valid_configurations = []
+        valid_configurations = [[]]
         return pairs, valid_configurations
 
     def solver(self):
-        valid_configurations = []
+        valid_configurations = [[]]
         return valid_configurations
 
     def play(self):
