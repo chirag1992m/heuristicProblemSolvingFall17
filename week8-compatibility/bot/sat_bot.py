@@ -49,8 +49,17 @@ class SatBot(GameClient):
 
     def poser(self):
         self.create_empty_graph()
-        pairs = [((1, 1), (2, 1))]
-        configs = [[1, 1]]
+        pairs = []
+        for i in range(1, self.parameters['packages']+1):
+            for j in range(1, self.parameters['versions']+1):
+                for k in range(i+1, self.parameters['packages']+1):
+                    for l in range(1, self.parameters['versions']+1):
+                        pairs.append([(i,j),(k,l)])
+        configs = [[self.parameters['versions'] for _ in range(self.parameters['packages'])]]
+        print(configs)
+        print(len(pairs))
+        # pairs = [((1, 1), (2, 1))]
+        # configs = [[1, 1]]
         return pairs, configs
 
     def remove_vertices_with_less_edges(self):
