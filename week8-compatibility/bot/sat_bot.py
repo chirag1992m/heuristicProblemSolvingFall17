@@ -57,9 +57,9 @@ class SatBot(GameClient):
         for i in range(n):
             v = random.randint(int(m/2 - math.sqrt(m)), int(m/2 + math.sqrt(m)))
             if v < 1:
-                v = m/2
+                v = m//2
             if v > m:
-                v = m/2
+                v = m//2
             configs.append(v)
 
         # our max clique added to graph
@@ -76,15 +76,19 @@ class SatBot(GameClient):
         pairs_left -= pairs_added
         pairs_clique = pairs_added
         # add more cliques below this clique
-        below = pairs_left/2
+        below = pairs_left//2
         while below > 0:
             temp_clique = []
             for i in range(n):
                 v = random.randint(1, configs[i])
                 temp_clique.append(v)
-            for pack in range(1, n+1):
-                for pack2 in range(1, n+1):
-                    if pack == pack2:
+            for pack1 in range(1, n+1):
+                if pairs_left <= 0:
+                    break
+                for pack2 in range(pack1+1, n+1):
+                    if pairs_left <= 0:
+                        break
+                    if pack1 == pack2:
                         continue
                     pairs.append(((pack1, temp_clique[pack1-1]), (pack2, temp_clique[pack2-1])))
                     pairs_added += 1
@@ -92,8 +96,7 @@ class SatBot(GameClient):
                     below -= 1
                     if below <= 0:
                         break
-
-        print(len(pairs), pairs_left)
+        print(len(pairs))
         # add randomly edges above our clique
         while pairs_left > 0:
             temp1 = []
@@ -103,23 +106,22 @@ class SatBot(GameClient):
                 v = random.randint(configs[i], m)
                 temp1.append(v)
                 v2 = v
-                while(v2 == v):
-                    v2 = random.randint(configs[i],m)
+                while v2 == v:
+                    v2 = random.randint(configs[i], m)
                 temp2.append(v2)
 
-            for pack in range(1, n+1):
+            for pack1 in range(1, n+1):
                 if pairs_left <= 0:
                     break
-                for pack2 in range(1, n+1):
+                for pack2 in range(pack1, n+1):
                     if pairs_left <= 0:
                         break
-                    if(pack == pack2):
+                    if pack1 == pack2:
                         continue
                     pairs.append(((pack1, temp1[pack1-1]), (pack2, temp2[pack2-1])))
                     pairs_added += 1
                     pairs_left -= 1
 
-        print(len(pairs), pairs_left)
         while pairs_left > 0:
             p1 = random.randint(1, n)
             p2 = p1
@@ -130,11 +132,10 @@ class SatBot(GameClient):
             pairs.append(((p1,v1), (p2,v2)))
             pairs_added += 1
             pairs_left -= 1
-            if pairs_left <= 0:
-                break
 
         configs = [configs]
         print(len(pairs), pairs_left)
+        print(configs)
         return pairs, configs
 
     def remove_vertices_with_less_edges(self):
@@ -151,8 +152,9 @@ class SatBot(GameClient):
                 self.graph.remove_node(node)
             if len(nodes_to_remove) == 0:
                 break
-        print("Graph has {} vertices left "
-              "after removing vertices with small degree.".format(self.graph.number_of_nodes()))
+        print("Graph has {} vertices and {} edges left "
+              "after removing vertices with small degree.".format(self.graph.number_of_nodes(),
+                                                                  self.graph.number_of_edges()))
         # nx.draw(self.graph)
         # plt.show()
 
@@ -219,36 +221,27 @@ class SatBot(GameClient):
             # print(cur)
             cnf.append(cur)
 
-        # print("Edge cnfs:")
         for edge in self.graph.edges():
-            p1, v1 = map(int, edge[0].split('_'))
-            p2, v2 = map(int, edge[1].split('_'))
             node1_var = self.node_variables[edge[0]]
             node2_var = self.node_variables[edge[1]]
             edge_var = self.edge_variables[edge]
             rel_var = self.relation_variables[edge]
-            # print([-edge_var, rel_var])
-            # print([-edge_var, node1_var])
-            # print([-edge_var, node2_var])
             cnf.append([-edge_var, rel_var])
             cnf.append([-edge_var, node1_var])
             cnf.append([-edge_var, node2_var])
             cnf.append([edge_var, -node1_var, -node2_var])
 
-        # print("Nodes in same package cnfs:")
         for package in range(1, self.parameters['packages']+1):
             for version1 in range(1, self.parameters['versions']+1):
                 node1 = str(package) + "_" + str(version1)
                 if node1 in self.graph.nodes():
                     for version2 in range(1, self.parameters['versions']+1):
                         node2 = str(package) + "_" + str(version2)
-                        if(node1 == node2):
+                        if node1 == node2:
                             continue
                         if node2 in self.graph.nodes():
                             cnf.append([-self.node_variables[node1], -self.node_variables[node2]])
-                            # print([-self.node_variables[node1], -self.node_variables[node2]])
 
-        # print("One of each package must be there")
         for package in range(1, self.parameters['packages']+1):
             cur = []
             for version1 in range(1, self.parameters['versions']+1):
@@ -256,7 +249,6 @@ class SatBot(GameClient):
                 if node1 in self.graph.nodes():
                     cur.append(self.node_variables[node1])
             cnf.append(cur)
-        # print(cnf)
         return cnf
 
     def solver(self):
@@ -264,8 +256,16 @@ class SatBot(GameClient):
         print(now)
         self.create_empty_graph()
         self.add_edges_from_pairs()
+        print("Graph has {} edges".format(self.graph.number_of_edges()))
         self.remove_vertices_with_less_edges()
         self.remove_vertices_with_fake_edges()
+        # arr = [23, 14, 13, 24, 17, 16, 16, 15, 24, 14, 23, 24, 21, 14, 22, 19, 13, 13, 14, 16]
+        # sampled_nodes = []
+        # for i in range(1, self.parameters['packages']+1):
+        #     sampled_nodes.append(str(i) + '_' + str(arr[i-1]))
+        # edges_required = (self.parameters['packages'] * (self.parameters['packages'] - 1)) // 2
+        # if self.graph.subgraph(sampled_nodes).number_of_edges() == edges_required:
+        #     print("Its there! WTF!")
         print("Graph with {} vertices and {} edges remain".format(self.graph.number_of_nodes(),
                                                                   self.graph.number_of_edges()))
         cnf = self.create_clauses()

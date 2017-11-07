@@ -45,7 +45,7 @@ class GameClient(object):
             else:
                 response = requests.get(url)
             response = json.loads(response.content)
-            print(response)
+            # print(response)
             if response['success']:
                 return response
             else:
@@ -195,7 +195,7 @@ class GameClient(object):
             for conf in configurations:
                 string_builder.append(' '.join(map(str, conf)))
             to_send = '\n'.join(string_builder)
-            print(to_send)
+            # print(to_send)
             self.submit_solution(to_send)
         elif self.player_role == 'solver':
             print("Running Solver...")
@@ -205,7 +205,7 @@ class GameClient(object):
                 string_builder.append(' '.join(map(str, conf)))
             to_send = '\n'.join(string_builder)
             print(to_send)
-            self.submit_solution(to_send)
+            self.submit_solution(to_send + '\n')
 
 
 if __name__ == "__main__":
