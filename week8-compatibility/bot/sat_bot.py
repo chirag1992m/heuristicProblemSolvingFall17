@@ -49,17 +49,92 @@ class SatBot(GameClient):
 
     def poser(self):
         self.create_empty_graph()
+        n = self.parameters['packages']
+        m = self.parameters['versions']
+        pairs = []
+        configs = []
+        for i in range(n):
+            v = random.randint(m/2 - math.sqrt(m), m/2 + math.sqrt(m))
+            if v < 1:
+                v = m/2
+            if(v > m):
+                v = m/2
+            configs.append(v)
+
+        # our max clique added to graph
+        pairs_added = 0
+        pairs_allowed = self.parameters['pairs']
+        pairs_left = pairs_allowed
+        for pack in range(1, n+1):
+            for pack2 in range(pack+1, n+1):
+                if(pack == pack2):
+                    continue
+                pairs.append(((pack1, configs[pack1-1]), (pack2, configs[pack2-1])))
+                pairs_added += 1
+
+        pairs_left -= pairs_added
+        pairs_clique = pairs_added
+        # add more cliques below this clique
+        below = pairs_left/2
+        while(below > pairs_clique):
+            temp_clique = []
+            for i in range(n):
+                v = random.randint(1, configs[i]):
+                temp_clique.append(v)
+            for pack in range(1, n+1):
+                for pack2 in range(1, n+1):
+                    if(pack == pack2):
+                        continue
+                    pairs.append(((pack1, temp_clique[pack1-1]), (pack2, temp_clique[pack2-1])))
+                    pairs_added += 1
+                    pairs_left -= 1
+
+        # add randomly edges above our clique
+        while(pairs_added < pairs_allowed):
+            temp1 = []
+            temp2 = []
+
+            for i in range(n):
+                v = random.randint(configs[i], m)
+                temp1.append(v)
+                v2 = v
+                while(v2 == v):
+                    v2 = random.randint(configs[i],m)
+                temp2.append(v2)
+
+            for pack in range(1, n+1):
+                for pack2 in range(1, n+1):
+                    if(pack == pack2):
+                        continue
+                    pairs.append(((pack1, temp1[pack1-1]), (pack2, temp2[pack2-1])))
+                    pairs_added += 1
+                    pairs_left -= 1
+
+        while(pairs_added < pairs_allowed):
+            p1 = random.randint(1, n)
+            p2 = p1
+            while(p2 == p1):
+                p2 = random.randint(1,n)
+            v1 = random.randint(1, m)
+            v2 = random.randint(1, m)
+            pairs_added += 1
+            pairs.append(((p1,v1), (p2,v2)))
+
+        configs = [configs]
+        return pairs, configs
+
+        '''
         pairs = []
         for i in range(1, self.parameters['packages']+1):
             for j in range(1, self.parameters['versions']+1):
                 for k in range(i+1, self.parameters['packages']+1):
                     for l in range(1, self.parameters['versions']+1):
-                        pairs.append([(i,j),(k,l)])
+                        pairs.append(((i,j),(k,l)))
         configs = [[self.parameters['versions'] for _ in range(self.parameters['packages'])]]
         print(configs)
         print(len(pairs))
         # pairs = [((1, 1), (2, 1))]
-        # configs = [[1, 1]]
+        # configs = [[1, 1]]'''
         return pairs, configs
 
     def remove_vertices_with_less_edges(self):
