@@ -107,43 +107,6 @@ class SatBot(GameClient):
             if self.graph.subgraph(sampled_nodes).number_of_edges() == edges_required:
                 yield sampled_nodes
 
-    @staticmethod
-    def compare_config(config1, config2):
-        length = len(config1)
-        comparisons = 0
-        for i, v in enumerate(config1):
-            if v < config2[i]:
-                break
-            comparisons += 1
-        if comparisons == length:
-            comparisons = 0
-            for i, v in enumerate(config1):
-                if v != config2[i]:
-                    break
-                comparisons += 1
-            if comparisons == length:
-                print("both equal")
-                return False
-            print("Config1 better")
-            return True
-        comparisons = 0
-        for i, v in enumerate(config1):
-            if v > config2[i]:
-                break
-            comparisons += 1
-        if comparisons == length:
-            print("Config2 better")
-            return False
-        print("Incomparable")
-        return True
-
-    @staticmethod
-    def compare_configs(configs, to_compare):
-        for config in configs:
-            if not SatBot.compare_config(to_compare, config):
-                return False
-        return True
-
     def remove_vertices_with_fake_edges(self):
         while True:
             nodes_to_remove = []
@@ -169,36 +132,35 @@ class SatBot(GameClient):
         for edge in self.graph.edges():
             self.edge_variables[edge] = self.counter
             self.counter += 1
-        for rel in self.pairs:
-            self.relation_variables[rel] = self.counter
+        for edge in self.graph.edges():
+            self.relation_variables[edge] = self.counter
             self.counter += 1
 
         cnf = []
-        print("Pair cnfs:")
+        # print("Pair cnfs:")
 
-        for rel in self.pairs:
-            cur = [self.relation_variables[rel]]
-            print(cur)
+        for edge in self.graph.edges():
+            cur = [self.relation_variables[edge]]
+            # print(cur)
             cnf.append(cur)
 
-        print("Edge cnfs:")
+        # print("Edge cnfs:")
         for edge in self.graph.edges():
             p1, v1 = map(int, edge[0].split('_'))
             p2, v2 = map(int, edge[1].split('_'))
             node1_var = self.node_variables[edge[0]]
             node2_var = self.node_variables[edge[1]]
             edge_var = self.edge_variables[edge]
-            relation = ((p1, v1), (p2, v2))
-            rel_var = self.relation_variables[relation]
-            print([-edge_var, rel_var])
-            print([-edge_var, node1_var])
-            print([-edge_var, node2_var])
+            rel_var = self.relation_variables[edge]
+            # print([-edge_var, rel_var])
+            # print([-edge_var, node1_var])
+            # print([-edge_var, node2_var])
             cnf.append([-edge_var, rel_var])
             cnf.append([-edge_var, node1_var])
             cnf.append([-edge_var, node2_var])
             cnf.append([edge_var, -node1_var, -node2_var])
 
-        print("Nodes in same package cnfs:")
+        # print("Nodes in same package cnfs:")
         for package in range(1, self.parameters['packages']+1):
             for version1 in range(1, self.parameters['versions']+1):
                 node1 = str(package) + "_" + str(version1)
@@ -209,10 +171,9 @@ class SatBot(GameClient):
                             continue
                         if node2 in self.graph.nodes():
                             cnf.append([-self.node_variables[node1], -self.node_variables[node2]])
-                            print([-self.node_variables[node1], -self.node_variables[node2]])
+                            # print([-self.node_variables[node1], -self.node_variables[node2]])
 
-
-        print("One of each package must be there")
+        # print("One of each package must be there")
         for package in range(1, self.parameters['packages']+1):
             cur = []
             for version1 in range(1, self.parameters['versions']+1):
@@ -220,12 +181,12 @@ class SatBot(GameClient):
                 if node1 in self.graph.nodes():
                     cur.append(self.node_variables[node1])
             cnf.append(cur)
-        print(cnf)
+        # print(cnf)
         return cnf
 
-
     def solver(self):
-        now = time.time()        
+        now = time.time()
+        print(now)
         self.create_empty_graph()
         self.add_edges_from_pairs()
         self.remove_vertices_with_less_edges()
@@ -246,8 +207,10 @@ class SatBot(GameClient):
                             cur.append(version1)
                             break
             configs.append(cur)
-            print(sol)
-        return configs
+            if time.time() - now > 100:
+                "Timeout. Breaking!"
+                break
+        return self.choose_best_config(configs)
 
 
 if __name__ == "__main__":
@@ -258,9 +221,9 @@ if __name__ == "__main__":
     parser.add_argument('--problem-id', default=None, type=str)
     parser.add_argument('--game-id', default=None, type=int)
     parser.add_argument('--access-code', default=None, type=int)
-    parser.add_argument('--packages', default=2, type=int)
-    parser.add_argument('--versions', default=3, type=int)
-    parser.add_argument('--pairs', default=5, type=int)
+    parser.add_argument('--packages', default=12, type=int)
+    parser.add_argument('--versions', default=12, type=int)
+    parser.add_argument('--pairs', default=10000, type=int)
 
     args = parser.parse_args()
     if args.game_id and args.access_code:

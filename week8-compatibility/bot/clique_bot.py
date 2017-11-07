@@ -44,8 +44,15 @@ class CliqueBot(GameClient):
 
     def poser(self):
         self.create_empty_graph()
-        pairs = [((1, 1), (2, 1)), ((1, 1), (2, 2))]
-        configs = [[1, 1]]
+        pairs = []
+        for i in range(1, self.parameters['packages']+1):
+            for j in range(1, self.parameters['versions']+1):
+                for k in range(i+1, self.parameters['packages']+1):
+                    for l in range(1, self.parameters['versions']+1):
+                        pairs.append([(i,j),(k,l)])
+        configs = [[self.parameters['versions'] for _ in range(self.parameters['packages'])]]
+        # pairs = [((1, 1), (2, 1))]
+        # configs = [[1, 1]]
         return pairs, configs
 
     def remove_vertices_with_less_edges(self):
@@ -77,12 +84,14 @@ class CliqueBot(GameClient):
         print("nodes per package: ", nodes_per_package)
         self.nodes_per_package = nodes_per_package
         first, last = 1, self.parameters['packages']
-        for version in self.nodes_per_package[first]:
+        for version in sorted(self.nodes_per_package[first],
+                              key=lambda x: int(x.split('_')[1]),
+                              reverse=True):
             visited = [version]
             stack = [iter(set(self.graph.neighbors(version)).intersection(
                 self.nodes_per_package[first+1]))]
             while stack:
-                children = stack[-1]
+                children = iter(stack[-1])
                 child = next(children, None)
                 if child is None:
                     stack.pop()
@@ -108,43 +117,6 @@ class CliqueBot(GameClient):
         for sampled_nodes in self.sample_nodes():
             if self.graph.subgraph(sampled_nodes).number_of_edges() == edges_required:
                 yield sampled_nodes
-
-    @staticmethod
-    def compare_config(config1, config2):
-        length = len(config1)
-        comparisons = 0
-        for i, v in enumerate(config1):
-            if v < config2[i]:
-                break
-            comparisons += 1
-        if comparisons == length:
-            comparisons = 0
-            for i, v in enumerate(config1):
-                if v != config2[i]:
-                    break
-                comparisons += 1
-            if comparisons == length:
-                print("both equal")
-                return True
-            print("Config1 better")
-            return True
-        comparisons = 0
-        for i, v in enumerate(config1):
-            if v > config2[i]:
-                break
-            comparisons += 1
-        if comparisons == length:
-            print("Config2 better")
-            return False
-        print("Incomparable")
-        return True
-
-    @staticmethod
-    def compare_configs(configs, to_compare):
-        for config in configs:
-            if not CliqueBot.compare_config(to_compare, config):
-                return False
-        return True
 
     def remove_vertices_with_fake_edges(self):
         while True:
@@ -179,12 +151,9 @@ class CliqueBot(GameClient):
                 config.append(version)
             configs.append(config)
             if time.time() - now > 100:
+                print("Time ran out!")
                 break
-        updated_configs = []
-        for config in configs:
-            if CliqueBot.compare_configs(configs, config):
-                updated_configs.append(config)
-        return [random.choice(updated_configs)]
+        return self.choose_best_config(configs)
 
 
 if __name__ == "__main__":
@@ -195,9 +164,9 @@ if __name__ == "__main__":
     parser.add_argument('--problem-id', default=None, type=str)
     parser.add_argument('--game-id', default=None, type=int)
     parser.add_argument('--access-code', default=None, type=int)
-    parser.add_argument('--packages', default=2, type=int)
+    parser.add_argument('--packages', default=3, type=int)
     parser.add_argument('--versions', default=3, type=int)
-    parser.add_argument('--pairs', default=5, type=int)
+    parser.add_argument('--pairs', default=10000, type=int)
 
     args = parser.parse_args()
     if args.game_id and args.access_code:

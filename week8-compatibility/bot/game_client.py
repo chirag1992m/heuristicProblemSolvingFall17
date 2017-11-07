@@ -3,6 +3,7 @@ from urllib.parse import urlencode
 import requests
 from datetime import datetime, timedelta
 import json
+import random
 
 
 class GameClient(object):
@@ -143,6 +144,43 @@ class GameClient(object):
     def solver(self):
         valid_configurations = []
         return valid_configurations
+
+    @staticmethod
+    def choose_best_config(configs):
+        return [random.choice(configs)]
+
+    @staticmethod
+    def compare_config(config1, config2):
+        length = len(config1)
+        comparisons = 0
+        for i, v in enumerate(config1):
+            if v < config2[i]:
+                break
+            comparisons += 1
+        if comparisons == length:
+            comparisons = 0
+            for i, v in enumerate(config1):
+                if v != config2[i]:
+                    break
+                comparisons += 1
+            if comparisons == length:
+                return True
+            return True
+        comparisons = 0
+        for i, v in enumerate(config1):
+            if v > config2[i]:
+                break
+            comparisons += 1
+        if comparisons == length:
+            return False
+        return True
+
+    @staticmethod
+    def compare_configs(configs, to_compare):
+        for config in configs:
+            if not GameClient.compare_config(to_compare, config):
+                return False
+        return True
 
     def play(self):
         if self.player_role == 'poser':
