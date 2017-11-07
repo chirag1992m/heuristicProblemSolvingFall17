@@ -109,7 +109,7 @@ class GameClient(object):
             problem = problem.split('\n')[0]
             parameters = tuple(map(int, problem.split(' ')))
         elif self.player_role == 'solver':
-            print(problem)
+            # print(problem)
             problem = problem.split('\n')
             parameters = tuple(map(int, problem[0].split(' ')))
             for i in range(1, len(problem) - 1):
@@ -147,40 +147,40 @@ class GameClient(object):
 
     @staticmethod
     def choose_best_config(configs):
-        return [random.choice(configs)]
+        maximal = configs[0]
+        found = False
+        for idx in range(1, len(configs)):
+            if GameClient.is_bigger(configs[idx], maximal):
+                maximal = configs[idx]
+                found = True
+        return [maximal]
 
     @staticmethod
-    def compare_config(config1, config2):
-        length = len(config1)
-        comparisons = 0
-        for i, v in enumerate(config1):
-            if v < config2[i]:
-                break
-            comparisons += 1
-        if comparisons == length:
-            comparisons = 0
-            for i, v in enumerate(config1):
-                if v != config2[i]:
-                    break
-                comparisons += 1
-            if comparisons == length:
-                return True
-            return True
-        comparisons = 0
-        for i, v in enumerate(config1):
-            if v > config2[i]:
-                break
-            comparisons += 1
-        if comparisons == length:
-            return False
-        return True
+    def is_incomparable(config1, config2):
+        small, big = False, False
+        for x1, x2 in zip(config1, config2):
+            if x1 < x2:
+                small = True
+            if x1 > x2:
+                big = True
+        return big and small
 
     @staticmethod
-    def compare_configs(configs, to_compare):
-        for config in configs:
-            if not GameClient.compare_config(to_compare, config):
+    def is_equal(config1, config2):
+        for x1, x2 in zip(config1, config2):
+            if x1 != x2:
                 return False
         return True
+
+    @staticmethod
+    def is_bigger(config1, config2):
+        bigger = False
+        for x1, x2 in zip(config1, config2):
+            if x1 < x2:
+                return False
+            if x1 > x2:
+                bigger = True
+        return bigger
 
     def play(self):
         if self.player_role == 'poser':

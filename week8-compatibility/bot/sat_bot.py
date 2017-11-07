@@ -5,6 +5,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import time
 import pycosat
+import math
 
 
 class SatBot(GameClient):
@@ -54,20 +55,20 @@ class SatBot(GameClient):
         pairs = []
         configs = []
         for i in range(n):
-            v = random.randint(m/2 - math.sqrt(m), m/2 + math.sqrt(m))
+            v = random.randint(int(m/2 - math.sqrt(m)), int(m/2 + math.sqrt(m)))
             if v < 1:
                 v = m/2
-            if(v > m):
+            if v > m:
                 v = m/2
             configs.append(v)
 
         # our max clique added to graph
         pairs_added = 0
-        pairs_allowed = self.parameters['pairs']
+        pairs_allowed = self.parameters['compatibilities']
         pairs_left = pairs_allowed
-        for pack in range(1, n+1):
-            for pack2 in range(pack+1, n+1):
-                if(pack == pack2):
+        for pack1 in range(1, n+1):
+            for pack2 in range(pack1+1, n+1):
+                if pack1 == pack2:
                     continue
                 pairs.append(((pack1, configs[pack1-1]), (pack2, configs[pack2-1])))
                 pairs_added += 1
@@ -76,21 +77,25 @@ class SatBot(GameClient):
         pairs_clique = pairs_added
         # add more cliques below this clique
         below = pairs_left/2
-        while(below > pairs_clique):
+        while below > 0:
             temp_clique = []
             for i in range(n):
-                v = random.randint(1, configs[i]):
+                v = random.randint(1, configs[i])
                 temp_clique.append(v)
             for pack in range(1, n+1):
                 for pack2 in range(1, n+1):
-                    if(pack == pack2):
+                    if pack == pack2:
                         continue
                     pairs.append(((pack1, temp_clique[pack1-1]), (pack2, temp_clique[pack2-1])))
                     pairs_added += 1
                     pairs_left -= 1
+                    below -= 1
+                    if below <= 0:
+                        break
 
+        print(len(pairs), pairs_left)
         # add randomly edges above our clique
-        while(pairs_added < pairs_allowed):
+        while pairs_left > 0:
             temp1 = []
             temp2 = []
 
@@ -103,38 +108,33 @@ class SatBot(GameClient):
                 temp2.append(v2)
 
             for pack in range(1, n+1):
+                if pairs_left <= 0:
+                    break
                 for pack2 in range(1, n+1):
+                    if pairs_left <= 0:
+                        break
                     if(pack == pack2):
                         continue
                     pairs.append(((pack1, temp1[pack1-1]), (pack2, temp2[pack2-1])))
                     pairs_added += 1
                     pairs_left -= 1
 
-        while(pairs_added < pairs_allowed):
+        print(len(pairs), pairs_left)
+        while pairs_left > 0:
             p1 = random.randint(1, n)
             p2 = p1
-            while(p2 == p1):
+            while p2 == p1:
                 p2 = random.randint(1,n)
             v1 = random.randint(1, m)
             v2 = random.randint(1, m)
-            pairs_added += 1
             pairs.append(((p1,v1), (p2,v2)))
+            pairs_added += 1
+            pairs_left -= 1
+            if pairs_left <= 0:
+                break
 
         configs = [configs]
-        return pairs, configs
-
-        '''
-        pairs = []
-        for i in range(1, self.parameters['packages']+1):
-            for j in range(1, self.parameters['versions']+1):
-                for k in range(i+1, self.parameters['packages']+1):
-                    for l in range(1, self.parameters['versions']+1):
-                        pairs.append(((i,j),(k,l)))
-        configs = [[self.parameters['versions'] for _ in range(self.parameters['packages'])]]
-        print(configs)
-        print(len(pairs))
-        # pairs = [((1, 1), (2, 1))]
-        # configs = [[1, 1]]'''
+        print(len(pairs), pairs_left)
         return pairs, configs
 
     def remove_vertices_with_less_edges(self):
@@ -296,8 +296,8 @@ if __name__ == "__main__":
     parser.add_argument('--problem-id', default=None, type=str)
     parser.add_argument('--game-id', default=None, type=int)
     parser.add_argument('--access-code', default=None, type=int)
-    parser.add_argument('--packages', default=12, type=int)
-    parser.add_argument('--versions', default=12, type=int)
+    parser.add_argument('--packages', default=20, type=int)
+    parser.add_argument('--versions', default=40, type=int)
     parser.add_argument('--pairs', default=10000, type=int)
 
     args = parser.parse_args()
