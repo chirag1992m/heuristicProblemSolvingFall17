@@ -20,6 +20,7 @@ class CliqueBot(GameClient):
                                         game_params)
         self.graph = nx.Graph()
         random.seed(42)
+        self.nodes_per_package = None
 
     def create_empty_graph(self):
         self.graph.clear()
@@ -43,7 +44,7 @@ class CliqueBot(GameClient):
 
     def poser(self):
         self.create_empty_graph()
-        pairs = [((1, 1), (2, 1))]
+        pairs = [((1, 1), (2, 1)), ((1, 1), (2, 2))]
         configs = [[1, 1]]
         return pairs, configs
 
@@ -74,17 +75,33 @@ class CliqueBot(GameClient):
             package = int(node.split('_')[0])
             nodes_per_package[package].append(node)
         print("nodes per package: ", nodes_per_package)
-        first = 1
-        last = self.parameters['packages']
-        for source in sorted(nodes_per_package[first],
-                             key=lambda x:int(x.split('_')[1]), reverse=True):
-            for target in sorted(nodes_per_package[last],
-                                 key=lambda x: int(x.split('_')[1]), reverse=True):
-                for path in nx.all_simple_paths(self.graph, source=source, target=target,
-                                                cutoff=self.parameters['packages']-1):
-                    if len(path) != self.parameters['packages']:
-                        continue
-                    yield path
+        self.nodes_per_package = nodes_per_package
+        first, last = 1, self.parameters['packages']
+        for version in self.nodes_per_package[first]:
+            visited = [version]
+            stack = [iter(set(self.graph.neighbors(version)).intersection(
+                self.nodes_per_package[first+1]))]
+            while stack:
+                children = stack[-1]
+                child = next(children, None)
+                if child is None:
+                    stack.pop()
+                    visited.pop()
+                elif len(visited) < self.parameters['packages'] - 1:
+                    visited.append(child)
+                    package = int(child.split('_')[0])
+                    stack.append(sorted(list(set(self.graph.neighbors(version)).intersection(
+                        self.nodes_per_package[package+1])),
+                                        key=lambda x: int(x.split('_')[1]),
+                                        reverse=True))
+                else:
+                    if child not in self.nodes_per_package[last]:
+                        "WTF!"
+                        stack.pop()
+                        visited.pop()
+                    yield visited + [child]
+                    stack.pop()
+                    visited.pop()
 
     def find_k_cliques(self):
         edges_required = (self.parameters['packages'] * (self.parameters['packages'] - 1))//2
@@ -108,7 +125,7 @@ class CliqueBot(GameClient):
                 comparisons += 1
             if comparisons == length:
                 print("both equal")
-                return False
+                return True
             print("Config1 better")
             return True
         comparisons = 0
@@ -157,14 +174,17 @@ class CliqueBot(GameClient):
         configs = []
         for clique in self.find_k_cliques():
             config = []
-            for node in sorted(clique, key=lambda x:int(x.split('_')[0])):
+            for node in sorted(clique, key=lambda x: int(x.split('_')[0])):
                 version = int(node.split('_')[1])
                 config.append(version)
-            if CliqueBot.compare_configs(configs, config):
-                configs.append(config)
+            configs.append(config)
             if time.time() - now > 100:
                 break
-        return configs
+        updated_configs = []
+        for config in configs:
+            if CliqueBot.compare_configs(configs, config):
+                updated_configs.append(config)
+        return [random.choice(updated_configs)]
 
 
 if __name__ == "__main__":
