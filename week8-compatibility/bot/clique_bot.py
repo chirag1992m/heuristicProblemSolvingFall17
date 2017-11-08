@@ -244,7 +244,8 @@ if __name__ == "__main__":
     parser.add_argument('--pairs', default=10000, type=int)
 
     args = parser.parse_args()
-    if args.game_id and args.access_code:
+    print(args)
+    if args.game_id is not None and args.access_code:
         client = CliqueBot(args.host, args.port,
                            args.player, 'CO',
                            {'game_id': args.game_id,

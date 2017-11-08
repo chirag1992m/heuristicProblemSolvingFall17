@@ -153,7 +153,12 @@ class GameClient(object):
             if GameClient.is_bigger(configs[idx], maximal):
                 maximal = configs[idx]
                 found = True
-        return [maximal]
+        best_configs = [maximal]
+        if found:
+            for idx in range(1, len(configs)):
+                if GameClient.is_incomparable(configs[idx], maximal):
+                    best_configs.append(configs[idx])
+        return [random.choice(best_configs)]
 
     @staticmethod
     def is_incomparable(config1, config2):
@@ -221,7 +226,7 @@ if __name__ == "__main__":
     parser.add_argument('--pairs', default=1, type=int)
 
     args = parser.parse_args()
-    if args.game_id and args.access_code:
+    if args.game_id is not None and args.access_code:
         client = GameClient(args.host, args.port,
                             args.player, 'CO',
                             {'game_id': args.game_id,
