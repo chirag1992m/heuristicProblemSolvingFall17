@@ -49,6 +49,8 @@ class SatBot(GameClient):
         # plt.show()
 
     def poser(self):
+        max_tries = 100000
+        tries = 0
         self.create_empty_graph()
         n = self.parameters['packages']
         m = self.parameters['versions']
@@ -91,6 +93,9 @@ class SatBot(GameClient):
                     if pack1 == pack2:
                         continue
                     if ((pack1, temp_clique[pack1-1]), (pack2, temp_clique[pack2-1])) in pairs:
+                        tries += 1
+                        if tries > max_tries:
+                            return pairs, [configs]
                         continue
                     pairs.append(((pack1, temp_clique[pack1-1]), (pack2, temp_clique[pack2-1])))
                     pairs_added += 1
@@ -110,6 +115,9 @@ class SatBot(GameClient):
                 v2 = v
                 while v2 == v:
                     v2 = random.randint(configs[i], m)
+                    tries += 1
+                    if tries > max_tries:
+                        return pairs, [configs]
                 temp2.append(v2)
 
             for pack1 in range(1, n+1):
@@ -121,6 +129,9 @@ class SatBot(GameClient):
                     if pack1 == pack2:
                         continue
                     if ((pack1, temp1[pack1-1]), (pack2, temp2[pack2-1])) in pairs:
+                        tries += 1
+                        if tries > max_tries:
+                            return pairs, [configs]
                         continue
                     pairs.append(((pack1, temp1[pack1-1]), (pack2, temp2[pack2-1])))
                     pairs_added += 1
@@ -134,8 +145,14 @@ class SatBot(GameClient):
             v1 = random.randint(1, m)
             v2 = random.randint(1, m)
             if ((p1,v1), (p2,v2)) in pairs:
+                tries += 1
+                if tries > max_tries:
+                    return pairs, [configs]
                 continue
             if ((p2,v2), (p1,v1)) in pairs:
+                tries += 1
+                if tries > max_tries:
+                    return pairs, [configs]
                 continue
             pairs.append(((p1,v1), (p2,v2)))
             pairs_added += 1
@@ -305,7 +322,7 @@ class SatBot(GameClient):
                             break
             configs.append(cur)
             if time.time() - now > 100:
-                "Timeout. Breaking!"
+                print("Timeout. Breaking!")
                 break
         maximal = self.choose_best_config(configs)[0]
         sampled_nodes = []
