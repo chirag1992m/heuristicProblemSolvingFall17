@@ -45,3 +45,8 @@ compatibilites and set of supposedly acceptable configurations
 Cposer and confirms them. Then Architect sends the set of compatibilities 
 to Solver and then waits up to two minutes to receive Csolver. Next, 
 Architect checks who wins based on the above rules.
+
+## How to run?
+The game can be downloaded from [this repository](https://github.com/liyouvane/HPS-CG). The instructions to run are in the repo.
+
+A copy of the game is available [here](compatibility.zip).
