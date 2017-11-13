@@ -11,15 +11,15 @@ In round j, item j in the list goes up for auction. Bids are whole numbers. The 
 Here is an example. Suppose there are two players (p = 2), four artists (k = 4), and the number of items that must be obtained is 3 (n = 3). Suppose that the first several items are: t2 t3 t4 t4 t4 t2 t3 t4 t2 t4 t2 t2 t2 t3 t4.
 
 Consider the following history: 
-player 1 wins t2 with 22 
-player 1 wins t3 with 15 
-player 0 wins t4 with 33 
-player 0 wins t4 with 33
+- player 1 wins t2 with 22 
+- player 1 wins t3 with 15 
+- player 0 wins t4 with 33 
+- player 0 wins t4 with 33
 
-player 1 wins t4 with 34 
-player 1 wins t2 with 22 
-player 1 wins t3 with 0 
-player 0 wins t4 with 8 and wins the game
+- player 1 wins t4 with 34 
+- player 1 wins t2 with 22 
+- player 1 wins t3 with 0 
+- player 0 wins t4 with 8 and wins the game
 
 Architect must build a server that can accept p, k, and n as parameters. Server program will generate the order of artists or accept that order from an external source. Server should also display at every round who wins and what they paid. The server must also provide that information to the client. Finally, the server keeps track of the time spent by each client between the time the client is told of the result of the last round and the time when the client puts in the next bid. Note that this is not the same as the elapsed running time of the client.
 
