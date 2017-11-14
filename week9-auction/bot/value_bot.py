@@ -1,5 +1,6 @@
 import argparse
 import random
+import time
 
 from .random_bot import RandomBot
 
@@ -24,6 +25,7 @@ class ValueBot(RandomBot):
                                          for _ in range(self.artists_types)]
         self.players_focus[name] = None
         self.wealth_distribution = None
+        self.to_redistribute = False
 
     def redistribute_wealth(self):
         required = self.required_paintings[self.name][self.players_focus[self.name]]
@@ -137,6 +139,17 @@ class ValueBot(RandomBot):
             required = self.required_paintings[self.name][self.players_focus[self.name]]
             to_return = self.wealth_distribution[-required]
         print("Bidding {} on {}".format(to_return, self.paintings_queue[0]))
+        if to_return == 0:
+            # check if someone else is winning. Don't let them win!
+            for player in self.player_wealths:
+                if player == self.name:
+                    continue
+                if (self.required_paintings[player][self.players_focus[player]] == 1
+                    and self.players_focus[player] == int(self.paintings_queue[0][1:])):
+                    to_return = self.player_wealths[player] + 1
+                    print("Tried to kick someone!")
+                    self.to_redistribute = True
+                    time.sleep(10)
         return to_return
 
     def check_game_status(self):
@@ -165,6 +178,9 @@ class ValueBot(RandomBot):
                                                  for _ in range(self.artists_types)]
             self.required_paintings[name][int(self.game_state['bid_item'][1:])] -= 1
             del self.paintings_queue[0]
+            if self.to_redistribute and self.game_state['bid_winner'] == self.name:
+                self.redistribute_wealth()
+            self.to_redistribute = False
         else:
             print('No bidders in this round {}.'.format(self.game_state['auction_round']))
 
