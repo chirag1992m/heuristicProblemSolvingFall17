@@ -151,18 +151,19 @@ class ValueBot(RandomBot):
         if self.players_focus[self.name] == int(self.paintings_queue[0][1:]):
             required = self.required_paintings[self.name][self.players_focus[self.name]]
             to_return = self.wealth_distribution[-required]
-        print("Bidding {} on {}".format(to_return, self.paintings_queue[0]))
         if to_return == 0:
+            print(self.required_paintings, self.players_focus)
             # check if someone else is winning. Don't let them win!
             for player in self.player_wealths:
                 if player == self.name:
                     continue
                 if (self.required_paintings[player][self.players_focus[player]] == 1
                     and self.players_focus[player] == int(self.paintings_queue[0][1:])):
-                    to_return = self.player_wealths[player] + 1
+                    to_return = min(self.player_wealths[player] + 1, self.current_wealth)
                     print("Tried to kick someone!")
                     self.to_redistribute = True
                     time.sleep(10)
+        print("Bidding {} on {} with left {}".format(to_return, self.paintings_queue[0], self.current_wealth))
         return to_return
 
     def check_game_status(self):
@@ -179,9 +180,10 @@ class ValueBot(RandomBot):
             name = self.game_state['bid_winner']
             if name not in self.player_paintings:
                 self.player_paintings[name] = [0 for _ in range(self.artists_types)]
+            for player in self.player_paintings:
                 if name != self.name:
-                    self.players_focus[name] = self.player_paintings[name].index(max(
-                        self.player_paintings[name]))
+                    self.players_focus[player] = self.player_paintings[player].index(max(
+                        self.player_paintings[player]))
             self.player_paintings[name][int(self.game_state['bid_item'][1:])] += 1
             if name not in self.player_wealths:
                 self.player_wealths[name] = self.init_status['init_wealth']
