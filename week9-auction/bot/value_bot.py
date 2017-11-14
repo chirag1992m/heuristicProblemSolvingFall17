@@ -47,8 +47,9 @@ class ValueBot(RandomBot):
                 y = (m2 * (i - middle[0])) + middle[1]
                 self.wealth_distribution.append(y)
             total = 0
+            s = sum(self.wealth_distribution)
             for i in range(len(self.wealth_distribution)):
-                y = int(self.current_wealth * self.wealth_distribution[i])
+                y = int(self.current_wealth * self.wealth_distribution[i] / s)
                 total += y
                 self.wealth_distribution[i] = y
             if total < self.current_wealth:
@@ -90,7 +91,7 @@ class ValueBot(RandomBot):
                     if required <= 0:
                         break
                     plays_required += 1
-                    if int(painting[1:]) == painting:
+                    if int(painting[1:]) == i:
                         required -= 1
                 if required <= 0:
                     self.paintings_value[player][i] += 1.0 / plays_required
@@ -113,14 +114,15 @@ class ValueBot(RandomBot):
         change = False
         old_focus = self.players_focus[name]
         try:
-            counter = 1
+            counter = 0
             while self.get_focus():
                 self.players_focus[name] = self.paintings_value[name].index(sorted(
                     self.paintings_value[name],
                     reverse=True)[counter])
                 counter += 1
                 change = True
-            print("Changed focus from {} to {}".format(old_focus, self.players_focus[name]))
+            if change:
+                print("Changed focus from {} to {}".format(old_focus, self.players_focus[name]))
         except Exception:
             self.players_focus[name] = old_focus
             change = False
@@ -134,6 +136,7 @@ class ValueBot(RandomBot):
         if self.players_focus[self.name] == int(self.paintings_queue[0][1:]):
             required = self.required_paintings[self.name][self.players_focus[self.name]]
             to_return = self.wealth_distribution[-required]
+        print("Bidding {} on {}".format(to_return, self.paintings_queue[0]))
         return to_return
 
     def check_game_status(self):
