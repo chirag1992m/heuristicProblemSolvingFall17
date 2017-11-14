@@ -84,6 +84,7 @@ class ValueBot(RandomBot):
     def value(self):
         self.paintings_value = dict()
         forget = None
+        change_focus = (False, -1)
         for player in self.player_paintings.keys():
             self.paintings_value[player] = [0.0 for _ in range(self.artists_types)]
             for i in range(self.artists_types):
@@ -92,6 +93,8 @@ class ValueBot(RandomBot):
                     print("Forgetting player {}".format(player))
                     forget = player
                     continue
+                if required == 1 and player == self.name:
+                    change_focus = (True, i)
                 self.paintings_value[player][i] += 1.0 / required
                 plays_required = 0
                 for painting in self.paintings_queue:
@@ -125,7 +128,13 @@ class ValueBot(RandomBot):
             print("Starting with focus {}".format(self.players_focus[name]))
             self.redistribute_wealth()
             return
-
+        if change_focus[0]:
+            if (self.players_focus[name] != change_focus[1] and
+                        self.required_paintings[name][self.players_focus[name]] > 1):
+                print("We randomly got some great paintings....")
+                self.players_focus[name] = change_focus[1]
+                self.redistribute_wealth()
+                return
         change = False
         old_focus = self.players_focus[name]
         try:
@@ -151,8 +160,8 @@ class ValueBot(RandomBot):
         if self.players_focus[self.name] == int(self.paintings_queue[0][1:]):
             required = self.required_paintings[self.name][self.players_focus[self.name]]
             to_return = self.wealth_distribution[-required]
+        print(self.required_paintings, self.players_focus, self.wealth_distribution)
         if to_return == 0:
-            print(self.required_paintings, self.players_focus)
             # check if someone else is winning. Don't let them win!
             for player in self.player_wealths:
                 if player == self.name:
