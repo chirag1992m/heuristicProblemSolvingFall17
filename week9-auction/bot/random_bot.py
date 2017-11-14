@@ -14,14 +14,15 @@ class RandomBot(object):
         self.__send_json({'name': name})
         self.name = name
 
-        init_status = self.receive_init()
-        self.artists_types = init_status['artists_types']
-        self.required_count = init_status['required_count']
-        self.auction_items = init_status['auction_items']
-        self.current_wealth = init_status['init_wealth']
-        self.player_count = init_status['player_count']
+        self.init_status = self.receive_init()
+        self.artists_types = self.init_status['artists_types']
+        self.required_count = self.init_status['required_count']
+        self.auction_items = self.init_status['auction_items']
+        self.current_wealth = self.init_status['init_wealth']
+        self.player_count = self.init_status['player_count']
         self.game_state = None
         self.items_bought = [0 for _ in range(self.artists_types)]
+        self.current_round = 0
 
     def __send_json(self, json_object):
         self.socket.sendall(bytes(json.dumps(json_object), 'utf-8'))
@@ -65,16 +66,15 @@ class RandomBot(object):
         return True
 
     def play(self):
-        current_round = 0
         while True:
             bid_amt = self.get_bid()
-            self.make_bid(self.auction_items[current_round], bid_amt)
+            self.make_bid(self.auction_items[self.current_round], bid_amt)
 
             # after sending bid, wait for other player
             self.game_state = self.receive_round()
             if not self.check_game_status():
                 break
-            current_round += 1
+            self.current_round += 1
 
 
 if __name__ == "__main__":
