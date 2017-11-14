@@ -83,10 +83,15 @@ class ValueBot(RandomBot):
 
     def value(self):
         self.paintings_value = dict()
+        forget = None
         for player in self.player_paintings.keys():
             self.paintings_value[player] = [0.0 for _ in range(self.artists_types)]
             for i in range(self.artists_types):
                 required = self.required_paintings[player][i]
+                if required == 0:
+                    print("Forgetting player {}".format(player))
+                    forget = player
+                    continue
                 self.paintings_value[player][i] += 1.0 / required
                 plays_required = 0
                 for painting in self.paintings_queue:
@@ -99,6 +104,14 @@ class ValueBot(RandomBot):
                     self.paintings_value[player][i] += 1.0 / plays_required
                 else:
                     self.paintings_value[player][i] = 0.0
+        if forget and forget != self.name:
+            self.player_paintings.pop(forget, None)
+            self.player_wealths.pop(forget, None)
+            self.required_paintings.pop(forget, None)
+            self.players_focus.pop(forget, None)
+        if forget == self.name:
+            print("Game should have finished!!!!")
+            exit()
         name = self.name
         if self.players_focus[name] is None:
             # take the second max, let the people catch the low hanging fruit
