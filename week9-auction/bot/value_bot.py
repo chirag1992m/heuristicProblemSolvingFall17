@@ -159,11 +159,15 @@ class ValueBot(RandomBot):
                     continue
                 if (self.required_paintings[player][self.players_focus[player]] == 1
                     and self.players_focus[player] == int(self.paintings_queue[0][1:])):
-                    to_return = min(self.player_wealths[player] + 1, self.current_wealth)
+                    required_wealth = self.required_paintings[self.name][
+                                          self.players_focus[self.name]] * 2
+                    left_wealth = max(0, self.current_wealth - required_wealth)
+                    to_return = min(self.player_wealths[player] + 1, left_wealth)
                     print("Tried to kick someone!")
                     self.to_redistribute = True
-                    time.sleep(10)
-        print("Bidding {} on {} with left {}".format(to_return, self.paintings_queue[0], self.current_wealth))
+                    time.sleep(5)
+        print("Bidding {} on {} with left {}".format(to_return, self.paintings_queue[0],
+                                                     self.current_wealth))
         return to_return
 
     def check_game_status(self):
