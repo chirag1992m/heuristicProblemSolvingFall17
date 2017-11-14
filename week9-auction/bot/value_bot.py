@@ -69,13 +69,15 @@ class ValueBot(RandomBot):
             if self.players_focus[player] == self.players_focus[name]:
                 competitors.append(player)
         for competitor in competitors:
-            if self.player_wealths[competitor] > self.player_wealths[name]:
-                # He has more money. What should we do?
-                if (self.required_paintings[competitor][self.players_focus[competitor]] >=
-                        self.required_paintings[name][self.players_focus[name]]):
-                    continue
-                # he can probably kill us
-                return True
+            if (self.required_paintings[competitor][self.players_focus[competitor]] >
+                    self.required_paintings[name][self.players_focus[name]]):
+                if self.player_wealths[competitor] > self.player_wealths[name]:
+                    return True
+                else:
+                    diff = (self.required_paintings[competitor][self.players_focus[competitor]] -
+                        self.required_paintings[name][self.players_focus[name]])
+                    if self.player_wealths[name] <= self.player_wealths[competitor] + 2*diff:
+                        return True
             else:
                 # haha you fucker. I am gonna beat you to death!
                 continue
