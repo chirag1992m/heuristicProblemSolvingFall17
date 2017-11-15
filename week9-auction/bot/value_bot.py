@@ -196,7 +196,7 @@ class ValueBot(RandomBot):
             if name not in self.player_paintings:
                 self.player_paintings[name] = [0 for _ in range(self.artists_types)]
             for player in self.player_paintings:
-                if name != self.name:
+                if player != self.name:
                     self.players_focus[player] = self.player_paintings[player].index(max(
                         self.player_paintings[player]))
             self.player_paintings[name][int(self.game_state['bid_item'][1:])] += 1
