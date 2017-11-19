@@ -65,42 +65,43 @@ class Client:
         return move_row, move_col
 
     def start(self):
-        while True:
-            move_data = self.__receive_move()
-            print("Got move {}".format(move_data))
-            # check if game is over
-            if int(move_data[0]) == 1:
-                self.set_winner(move_data)
-                break
+        for p in range(self.num_players):
+            while True:
+                move_data = self.__receive_move()
+                print("Got move {}".format(move_data))
+                # check if game is over
+                if int(move_data[0]) == 1:
+                    self.set_winner(move_data)
+                    break
 
-            # scores
-            scores = []
-            for i in range(self.num_players):
-                scores.append(move_data[i + 1])
-            # new moves
-            new_moves = move_data[self.num_players + 1:]
-            num_new_moves = int(len(new_moves) / 3)
-            # sanity check
-            if num_new_moves * 3 != len(new_moves):
-                print("Error: error parsing list of new moves")
+                # scores
+                scores = []
+                for i in range(self.num_players):
+                    scores.append(move_data[i + 1])
+                # new moves
+                new_moves = move_data[self.num_players + 1:]
+                num_new_moves = int(len(new_moves) / 3)
+                # sanity check
+                if num_new_moves * 3 != len(new_moves):
+                    print("Error: error parsing list of new moves")
 
-            # insert new moves into the grid
-            for i in range(num_new_moves):
-                move_row = int(new_moves[3 * i])
-                move_col = int(new_moves[3 * i + 1])
-                player = int(new_moves[3 * i + 2])
-                # sanity check, this should always be true
-                if player > 0:
-                    self.grid[move_row][move_col] = player
-                    self.moves.append((move_row, move_col, player))
-                else:
-                    print("Error: player info incorrect")
+                # insert new moves into the grid
+                for i in range(num_new_moves):
+                    move_row = int(new_moves[3 * i])
+                    move_col = int(new_moves[3 * i + 1])
+                    player = int(new_moves[3 * i + 2])
+                    # sanity check, this should always be true
+                    if player > 0:
+                        self.grid[move_row][move_col] = player
+                        self.moves.append((move_row, move_col, player))
+                    else:
+                        print("Error: player info incorrect")
 
-            # make move
-            my_move_row, my_move_col = self.get_move()
-            self.moves.append((my_move_row, my_move_col, self.player_number))
-            self.__send_move(my_move_row, my_move_col)
-            print("Played at row {}, col {}".format(my_move_row, my_move_col))
+                # make move
+                my_move_row, my_move_col = self.get_move()
+                self.moves.append((my_move_row, my_move_col, self.player_number))
+                self.__send_move(my_move_row, my_move_col)
+                print("Played at row {}, col {}".format(my_move_row, my_move_col))
 
         self.sock.close()
 
