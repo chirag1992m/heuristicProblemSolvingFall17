@@ -105,4 +105,22 @@ The instructions to run are given in README.md of the game directory.
 
 ## Bots
 
-### [Random Bot]()
+### [Random Bot](./bot/random_player.py)
+It simple makes a random move. No surprises there bro!
+
+### [Min-Max](./bot/min_max.py)
+This was a bot based on the min/max algorithm. It didn't work out well as the branching
+factor was too big to handle with such a simple algorithm
+
+### [Heuristic Based](./bot/confine_prey.py)
+
+It is a simple heuristic for the hunter:
+- As soon as we're trying to come close to the prey horizontally, hunter builds
+a horizontal wall so that hunter and prey are in the same area.
+- after 5 moves, hunter creates another wall horizontally to trap the prey in a smaller
+area, although the hunter cannot be in it yet as it is moving away from it already.
+- After the reflection, the hunter comes back to that area and in one move deletes the
+wall and creates another one which makes the hunter and prey in the same confined area.
+- This process is repeated until hunter and prey comes close enough for the game to end.
+
+We didn't implement anything for the prey :(

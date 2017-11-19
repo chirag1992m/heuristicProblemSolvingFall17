@@ -29,3 +29,13 @@ The game can be downloaded from [this repo](https://github.com/samcmho/HPS-Aucti
 Instructions to run the game are given inside the game.
 
 The copy of the game is available [here](AuctionGame.zip)
+
+## Bot
+
+Both bots are quite similar and simple work by finding the best possible artist to bid on
+based on enough number of paintings available and available as soon as possible. Then the
+money is divided in a quadratic manner among the bids as we want higher bids at the start and
+at the end (if someone is trying to not let us win when we are close to winning) and middle bids can
+be smaller as we assumed no one would care to stop us unless we are close to winning. 
+Other than that, if any player is very close to winning, we try to outbid him on his preferred 
+artist.

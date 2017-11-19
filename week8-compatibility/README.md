@@ -50,3 +50,32 @@ Architect checks who wins based on the above rules.
 The game can be downloaded from [this repository](https://github.com/liyouvane/HPS-CG). The instructions to run are in the repo.
 
 A copy of the game is available [here](compatibility.zip).
+
+## Bot
+
+### Pre-Processing
+In all the bots, we do some pre processing given a problem to satisfy. The pre processing is simple
+and consists of the following steps:
+- Remove all those vertices which have degrees less than the number of packages-1
+- We also removed edges which have "fake degrees". Every vertice should be connected to every
+other package vertices. If it has multiple edges in the same package, then it is counted as one 
+and the degree is counted again. If the degree is smaller than packages-1, then it is removed.
+
+### Poser
+For poser, we try to make the searching problem harder by making a clique in the middle of the
+graph and adding random cliques below the graph and incomplete cliques above the graph.
+
+### [Clique Bot](./bot/clique_bot.py)
+The problem can be structured as a finding a clique in a graph with the maximum version numbers of
+each package. This bot simply creates a graph of the problem, and tries to run through every possible
+path from package-1 to package-n and checking if it is a clique. If it's a clique, it is added
+to the list of possible solutions. When the timer ends, it simply returns the best of the possible
+solutions found. This was really slow to work.
+
+### [Satisfiability - Bot](./bot/sat_bot.py)
+The problem is framed into a set of constraints and then every constraint is converted into 
+a boolean expression and fed into a sat-solver to find the possible solutions. Then the best of
+all the possible solutions is returned. The constraints are:
+- If a px.vx, py.vy is selected, there should be an edge between them.
+- There should be only one version selected for every package.
+- There should be one version for every package

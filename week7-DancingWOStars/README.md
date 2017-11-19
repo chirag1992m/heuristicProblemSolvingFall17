@@ -20,10 +20,8 @@ The instructions to run are given in README.md of the game directory.
 
 ## Bots
 
-- if C = 2, set of bipartite graphs (with parallel steps required as weight) 
-depending on the parallel moves you take. And, finding the minimum weight 
-bipartite match out of all the graphs.
+### [Sampling Bot](./bot/sampling_bot.py)
 
-- for C > 2, the problem becomes C-dimensional matching with an even bigger set
-of possible graphs in the set and every problem is NP-hard! FUCK THIS SHIT!  I
-should have been a doctor!
+As the name suggests, we simply sample our moves. The choreographer starts by sampling 
+the centers the dancers should move towards. And then we use maximum matching algorithm
+to find which dancer should go to which center.
