@@ -32,23 +32,23 @@ class GameInfo:
             # print("Adding wall: {}".format(wall))
             if wall[0] == 0:
                 _, y, x1, x2 = wall
-                grid[x1:min(299, x2+1), y] = 1
+                grid[x1:min(300, x2+1), y] = 1
             elif wall[0] == 1:
                 _, x, y1, y2 = wall
-                grid[x, y1:min(299, y2+1)] = 1
+                grid[x, y1:min(300, y2+1)] = 1
             elif wall[0] == 2:
                 _, x1, x2, y1, y2, direction = wall
                 if direction == 0:
                     y = y1
                     for x in range(x1, x2):
-                        grid[x][min(299, y)] = 1
+                        grid[x][min(300, y)] = 1
                         if x != x2:
                             grid[x+1][y] = 1
                             y += 1
                 else:
                     x = x1
                     for y in range(y1, y2+1):
-                        grid[min(299, x)][y] = 1
+                        grid[min(300, x)][y] = 1
                         if y != y2:
                             grid[x][y+1] = 1
                             x += 1
