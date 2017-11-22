@@ -4,7 +4,7 @@ import random
 import argparse
 import pickle
 import os
-from client import Client
+from .client import Client
 
 
 class ClusterBot2(Client):
@@ -16,14 +16,22 @@ class ClusterBot2(Client):
         self.current_move = 0
         self.used_clusters = [0 for i in range(self.num_stone)]
 
+    def reset(self):
+        self.cluster = self.load_clusters(self.num_stone)
+        self.current_move = 0
+        self.used_clusters = [0 for i in range(self.num_stone)]
+        self.grid = [[0] * self.grid_size for _ in range(self.grid_size)]
+        self.moves = []
+        print("everything cleared!")
+
     @staticmethod
     def load_clusters(num_stones):
-        return pickle.load(open('cluster_bot_precomputed_{}.pkl'.format(num_stones), 'rb'))
+        return pickle.load(open('./bot/cluster_bot_precomputed_{}.pkl'.format(num_stones), 'rb'))
 
     @staticmethod
     def pre_calculate_clusters():
         for k in range(1, 13):
-            file_name = 'cluster_bot_precomputed_{}.pkl'.format(k)
+            file_name = './bot/cluster_bot_precomputed_{}.pkl'.format(k)
             if os.path.exists(file_name):
                 continue
             clusters = ClusterBot2.compute_clusters(k)

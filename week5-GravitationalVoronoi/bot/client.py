@@ -25,6 +25,9 @@ class Client:
         self.winner = -1
         print("Client initialized")
 
+    def reset(self):
+        pass
+
     def __receive(self):
         return self.sock.recv(2048).decode('utf-8')
 
@@ -71,7 +74,9 @@ class Client:
                 print("Got move {}".format(move_data))
                 # check if game is over
                 if int(move_data[0]) == 1:
+                    print("Game finished")
                     self.set_winner(move_data)
+                    self.reset()
                     break
 
                 # scores

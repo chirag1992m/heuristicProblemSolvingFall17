@@ -4,7 +4,7 @@ import random
 import argparse
 import pickle
 import os
-from client import Client
+from .client import Client
 
 
 class ClusterBot(Client):
@@ -14,6 +14,13 @@ class ClusterBot(Client):
         super().__init__(host, port, name)
         self.cluster = self.load_clusters(self.num_stone)
         self.current_move = 0
+
+    def reset(self):
+        self.cluster = self.load_clusters(self.num_stone)
+        self.current_move = 0
+        self.grid = [[0] * self.grid_size for _ in range(self.grid_size)]
+        self.moves = []
+        print("everything cleared!")
 
     @staticmethod
     def load_clusters(num_stones):
