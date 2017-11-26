@@ -123,4 +123,6 @@ area, although the hunter cannot be in it yet as it is moving away from it alrea
 wall and creates another one which makes the hunter and prey in the same confined area.
 - This process is repeated until hunter and prey comes close enough for the game to end.
 
-We didn't implement anything for the prey :(
+For Prey:
+- It tries to move to the center of the current bounding box where the hunter will not visit
+for a long time. This is more of an empirical strategy.
