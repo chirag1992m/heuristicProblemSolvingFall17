@@ -3,8 +3,8 @@ import itertools
 import numpy as np
 import random
 
-from base_bot import BaseBot
-from game_info import GameInfo
+from .base_bot import BaseBot
+from .game_info import GameInfo
 
 
 class MinMaxBot(BaseBot):

@@ -1,5 +1,5 @@
 import argparse
-from base_bot import BaseBot
+from .base_bot import BaseBot
 import random
 import math
 from math import fabs

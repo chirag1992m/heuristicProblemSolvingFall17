@@ -4,7 +4,7 @@ from enum import Enum
 import six
 import socket
 
-from game_info import GameInfo
+from .game_info import GameInfo
 
 
 class BaseBot(object):
