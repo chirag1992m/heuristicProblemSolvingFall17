@@ -159,7 +159,10 @@ def train_model(dataset_path, path_to_save):
 def evaluate(agent_1, agent_2):
     print("Evaluating agent...")
     draw, win_1, win_2 = benchmark_agent(agent_1, agent_2, randomize=randomize_eval)
-    ratio = ((win_1 - win_2) * 100)/win_2
+    if win_2 > 0:
+        ratio = ((win_1 - win_2) * 100)/win_2
+    else:
+        ratio = float('inf')
     print("Evaluation complete with win ratio: {}".format(ratio))
     return ratio > win_ratio
 
