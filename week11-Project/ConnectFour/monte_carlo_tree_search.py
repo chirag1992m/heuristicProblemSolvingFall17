@@ -6,9 +6,13 @@ from gym.envs.board_game.connect_four import ConnectFourEnv
 
 
 def get_height(state):
-    height = np.zeros(7)
+    height = np.zeros(7, dtype=np.int)
     for i in range(state.shape[-1]):
-        height[i] = np.where(state[2][i])[0]
+        where = np.where(state[2][i])[0]
+        if len(where):
+            height[i] = where[0]
+        else:
+            height[i] = 7
     return height
 
 
