@@ -188,7 +188,7 @@ class MCTSConnectFour:
                                edge_info=MoveEdgeInfo(action))
 
         # Decrease the temperature
-        self.temperature = self.temperature * self.temperature_expand
+        self.temperature = min(self.temperature * self.temperature_expand, 50.0)
 
     def rollout(self, with_action):
         current_state = self.current_state.copy()
@@ -288,6 +288,7 @@ class MCTSConnectFour:
         for child in self.tree.neighbors(parent):
             action = self.tree.edges[(parent, child)]['edge_info'].get_action()
             count = self.tree.nodes[child]['node_info'].get_visit_count()
+            # print(count, self.temperature)
             count = math.pow(count, self.temperature)
             total_visit += count
             action_visit[action] = count
