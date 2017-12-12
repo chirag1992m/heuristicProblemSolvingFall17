@@ -194,6 +194,7 @@ for episode in range(1, episodes+1):
         improve_patience = 0
         win_ratio = max(win_ratio * win_ratio_factor, win_ratio_min)
         if win_ratio == win_ratio_min:
+            print("Switching on evaluation mode...")
             randomize_eval = False
         print("Found better agent...updating...")
         best_model.load_state_dict(current_model.state_dict())
