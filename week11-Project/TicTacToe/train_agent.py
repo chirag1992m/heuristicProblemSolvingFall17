@@ -51,6 +51,7 @@ improvement_patience = 10
 win_ratio_factor = .8
 win_ratio_min = 10
 early_stopping_patience = 50
+randomize_eval = True
 
 # Set Seeds for Reproducibility
 torch.manual_seed(42)
@@ -157,7 +158,7 @@ def train_model(dataset_path, path_to_save):
 
 def evaluate(agent_1, agent_2):
     print("Evaluating agent...")
-    draw, win_1, win_2 = benchmark_agent(agent_1, agent_2)
+    draw, win_1, win_2 = benchmark_agent(agent_1, agent_2, randomize=randomize_eval)
     ratio = ((win_1 - win_2) * 100)/win_2
     print("Evaluation complete with win ratio: {}".format(ratio))
     return ratio > win_ratio
@@ -192,6 +193,8 @@ for episode in range(1, episodes+1):
     if better:
         improve_patience = 0
         win_ratio = max(win_ratio * win_ratio_factor, win_ratio_min)
+        if win_ratio == win_ratio_min:
+            randomize_eval = False
         print("Found better agent...updating...")
         best_model.load_state_dict(current_model.state_dict())
         os.remove(BEST_MODEL_PATH)
