@@ -40,7 +40,7 @@ learning_rate = 0.001
 weight_decay = 0.0001
 episodes = 100
 epochs = 500
-win_ratio = 5
+win_ratio = 55
 training_games = 50
 mcts_simulations = 50
 batch_size = 64
@@ -48,9 +48,11 @@ epoch_logging = 50
 temperature = 1.
 temperature_decay = 0.75
 improvement_patience = 10
-win_ratio_factor = 1.1
-win_ratio_max = 55
+win_ratio_factor = .8
+win_ratio_min = 10
 early_stopping_patience = 50
+randomize_eval = True
+best_random_ratio = 0.0
 
 # Set Seeds for Reproducibility
 torch.manual_seed(42)
@@ -157,10 +159,13 @@ def train_model(dataset_path, path_to_save):
 
 def evaluate(agent_1, agent_2):
     print("Evaluating agent...")
-    draw, win_1, win_2 = benchmark_agent(agent_1, agent_2)
-    ratio = ((win_1 - win_2) * 100)/win_2
+    draw, win_1, win_2 = benchmark_agent(agent_1, agent_2, randomize=randomize_eval)
+    if win_2 > 0:
+        ratio = ((win_1 - win_2) * 100)/win_2
+    else:
+        ratio = float('inf')
     print("Evaluation complete with win ratio: {}".format(ratio))
-    return ratio > win_ratio
+    return ratio > win_ratio, ratio
 
 
 TRAIN_DIR = 'tic_tac_toe_train_data'
@@ -174,6 +179,7 @@ torch.save({'model': best_model.state_dict()}, BEST_MODEL_PATH)
 improve_patience = 0
 for episode in range(1, episodes+1):
     best_agent = SelfPlayRLAgent(BEST_MODEL_PATH, "best_agent")
+    best_agent.train()
 
     TRAINING_DATA_PATH = os.path.join(TRAIN_DIR, 'episode_{}.pkl'.format(episode))
     generate_training_data(best_agent, TRAINING_DATA_PATH)
@@ -184,13 +190,13 @@ for episode in range(1, episodes+1):
     train_model(training_data_paths, CURRENT_MODEL_PATH)
 
     current_agent = SelfPlayRLAgent(CURRENT_MODEL_PATH, "current_agent")
-    better = evaluate(current_agent, best_agent)
+    better, _ = evaluate(current_agent, best_agent)
     print("Completed episode: {}".format(episode))
 
-    _ = evaluate(current_agent, RandomPlayer())
+    _, _ = evaluate(current_agent, RandomPlayer())
     if better:
         improve_patience = 0
-        win_ratio = min(win_ratio * win_ratio_factor, win_ratio_max)
+        win_ratio = max(win_ratio * win_ratio_factor, win_ratio_min)
         print("Found better agent...updating...")
         best_model.load_state_dict(current_model.state_dict())
         os.remove(BEST_MODEL_PATH)

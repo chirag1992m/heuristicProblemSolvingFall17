@@ -15,7 +15,7 @@ env = gym.make('TicTacToe3x3-v0')
 cross_player = None
 if args.p1 == 'self_play':
     cross_player = SelfPlayRLAgent('tic_tac_toe_train_data/best_agent.pkl',
-                                   verbose=True, eval=False)
+                                   verbose=True)
 elif args.p1 == 'human':
     cross_player = HumanPlayer()
 elif args.p1 == 'random':
@@ -24,11 +24,14 @@ elif args.p1 == 'random':
 naught_player = None
 if args.p2 == 'self_play':
     naught_player = SelfPlayRLAgent('tic_tac_toe_train_data/best_agent.pkl',
-                                    verbose=True, eval=False)
+                                    verbose=True)
 elif args.p2 == 'human':
     naught_player = HumanPlayer()
 elif args.p2 == 'random':
     naught_player = RandomPlayer()
+
+cross_player.eval()
+naught_player.eval()
 
 obs = env.reset()
 while True:

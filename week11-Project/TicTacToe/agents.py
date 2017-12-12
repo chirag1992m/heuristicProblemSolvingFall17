@@ -24,6 +24,12 @@ class Agent(object):
     def get_name(self):
         return "No Agent!"
 
+    def eval(self):
+        pass
+
+    def train(self):
+        pass
+
 
 class SelfPlayRLAgent(Agent):
     def __init__(self, filename, name=None, verbose=False, eval=False):
@@ -36,7 +42,7 @@ class SelfPlayRLAgent(Agent):
         if name is not None:
             self.name = name
         self.verbose = verbose
-        self.eval = eval
+        self.eval_val = eval
 
     def get_p_v(self, state, chance):
         possible_moves = TicTacToeEnv.get_possible_actions(state)
@@ -54,29 +60,27 @@ class SelfPlayRLAgent(Agent):
             print(P, V)
         return torch.multinomial(P[0], num_samples=1)[0]
 
-    def get_action_value_maximizer(self, state, chance):
-        possible_actions = TicTacToeEnv.get_possible_actions(state)
-        if not possible_actions:
-            return None
-        values = [-1.1] * 9
-        for action in possible_actions:
-            current_state = state.copy()
-            TicTacToeEnv.make_move(current_state, action, chance)
-            _, value = self.get_non_torch_p_v(current_state, 1 - chance)
-            values[action] = value
-        action_to_take = np.argmax(values)
+    def get_action_maximizer(self, state, chance):
+        P, V = self.get_p_v(state, chance)
         if self.verbose:
-            print("Next Values: ", values, action_to_take)
+            print(P, V)
+        action_to_take = np.argmax(P.data.numpy()[0])
         return action_to_take
 
     def get_action(self, state, chance):
-        if self.eval:
-            return self.get_action_value_maximizer(state, chance)
+        if self.eval_val:
+            return self.get_action_maximizer(state, chance)
         else:
             return self.get_action_sampled(state, chance).data.numpy()[0]
 
     def get_name(self):
         return self.name
+
+    def eval(self):
+        self.eval_val = True
+
+    def train(self):
+        self.eval_val = False
 
     @staticmethod
     def filename():
