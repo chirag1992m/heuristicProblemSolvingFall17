@@ -42,7 +42,7 @@ class SelfPlayRLAgent(Agent):
         if name is not None:
             self.name = name
         self.verbose = verbose
-        self.eval = eval
+        self.eval_val = eval
 
     def get_p_v(self, state, chance):
         possible_moves = TicTacToeEnv.get_possible_actions(state)
@@ -68,7 +68,7 @@ class SelfPlayRLAgent(Agent):
         return action_to_take
 
     def get_action(self, state, chance):
-        if self.eval:
+        if self.eval_val:
             return self.get_action_maximizer(state, chance)
         else:
             return self.get_action_sampled(state, chance).data.numpy()[0]
@@ -77,10 +77,10 @@ class SelfPlayRLAgent(Agent):
         return self.name
 
     def eval(self):
-        self.eval = True
+        self.eval_val = True
 
     def train(self):
-        self.eval = False
+        self.eval_val = False
 
     @staticmethod
     def filename():
