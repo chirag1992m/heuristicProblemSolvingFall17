@@ -16,7 +16,7 @@ def benchmark_agent(agent_1, agent_2, games=1000, randomize=False):
         obs = env.reset()
         # env.render()
         reward = None
-        for move in range(9):
+        for move in range(49):
             if move % 2 == 0:
                 action = agent_1.get_action(obs[1], 1)
                 obs, reward, done, _ = env.step((1, action))
@@ -37,7 +37,7 @@ def benchmark_agent(agent_1, agent_2, games=1000, randomize=False):
         obs = env.reset()
         # env.render()
         reward = None
-        for move in range(9):
+        for move in range(49):
             if move % 2 == 0:
                 action = agent_2.get_action(obs[1], 1)
                 obs, reward, done, _ = env.step((1, action))

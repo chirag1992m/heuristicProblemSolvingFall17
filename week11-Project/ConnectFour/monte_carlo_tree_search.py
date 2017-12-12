@@ -71,8 +71,8 @@ class StateNodeInfo:
     def pack_state(state):
         hash_val = 0
         position_val = 1
-        for i in range(3):
-            for j in range(3):
+        for i in range(7):
+            for j in range(7):
                 if state[2][i][j] == 0:
                     if state[0][i][j]:
                         hash_val += position_val * 1
@@ -81,24 +81,21 @@ class StateNodeInfo:
                 position_val *= 3
         return hash_val
 
-    # @staticmethod
-    # def unpack_state(num):
-    #     state = np.zeros((3, 3, 3))
-    #     state[2, :] = 1
-    #     current_pos = 0
-    #     while num > 0:
-    #         rem = num % 3
-    #         if rem == 1:
-    #             coordinate = TicTacToeEnv.action_to_coordinate(current_pos, 3)
-    #             state[0][coordinate[0]][coordinate[1]] = 1
-    #             state[2][coordinate[0]][coordinate[1]] = 0
-    #         elif rem == 2:
-    #             coordinate = TicTacToeEnv.action_to_coordinate(current_pos, 3)
-    #             state[1][coordinate[0]][coordinate[1]] = 1
-    #             state[2][coordinate[0]][coordinate[1]] = 0
-    #         num = num // 3
-    #         current_pos += 1
-    #     return state
+    @staticmethod
+    def unpack_state(num):
+        state = np.zeros((3, 7, 7))
+        state[2, :] = 1
+        for i in range(7):
+            for j in range(7):
+                rem = num % 3
+                num = num // 3
+                if rem == 1:
+                    state[0][i][j] = 1
+                    state[2][i][j] = 0
+                elif rem == 2:
+                    state[0][i][j] = 1
+                    state[2][i][j] = 0
+        return state
 
 
 class MoveEdgeInfo:
@@ -286,7 +283,7 @@ class MCTSConnectFour:
 
     def get_simulated_policy_value(self):
         parent = StateNodeInfo.pack_state(self.current_state)
-        action_visit = [0] * 9
+        action_visit = [0] * 7
         total_visit = 0
         for child in self.tree.neighbors(parent):
             action = self.tree.edges[(parent, child)]['edge_info'].get_action()

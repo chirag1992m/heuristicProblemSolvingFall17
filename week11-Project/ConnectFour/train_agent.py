@@ -89,13 +89,13 @@ def generate_training_data(agent, data_path, n_games=training_games):
             pi, z = mcts.get_simulated_policy_value()
             current_game_data.append(((obs[chance].copy(), chance),
                                       pi, z))
-            action = np.random.choice(np.arange(9), p=pi)
+            action = np.random.choice(np.arange(7), p=pi)
             obs, reward, done, _ = env.step((chance, action))
             if all(done):
                 current_game_data.append(((obs[chance].copy(), chance),
-                                          [0.] * 9, reward[1 - chance]))
+                                          [0.] * 7, reward[1 - chance]))
                 current_game_data.append(((obs[chance].copy(), 1 - chance),
-                                          [0.] * 9, reward[chance]))
+                                          [0.] * 7, reward[chance]))
                 break
             chance = 1 - chance
             mcts.move_to_child_with_action(action)
