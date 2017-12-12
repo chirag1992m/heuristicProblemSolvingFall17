@@ -130,14 +130,14 @@ class MoveEdgeInfo:
 
 class MCTSConnectFour:
     def __init__(self, S_0, current_player, agent, simulations=50,
-                 temperature=1., temperature_decay=0.9):
+                 temperature=1., temperature_expand=1.5):
         self.root_state = S_0.copy()
         self.current_state = self.root_state.copy()
         self.agent = agent
         self.simulations = simulations
         self.current_player = current_player
         self.temperature = temperature
-        self.temperature_decay = temperature_decay
+        self.temperature_expand = temperature_expand
         self.tree = nx.DiGraph()
 
         self.build_mct()
@@ -188,7 +188,7 @@ class MCTSConnectFour:
                                edge_info=MoveEdgeInfo(action))
 
         # Decrease the temperature
-        self.temperature = self.temperature * self.temperature_decay
+        self.temperature = self.temperature * self.temperature_expand
 
     def rollout(self, with_action):
         current_state = self.current_state.copy()
@@ -288,7 +288,7 @@ class MCTSConnectFour:
         for child in self.tree.neighbors(parent):
             action = self.tree.edges[(parent, child)]['edge_info'].get_action()
             count = self.tree.nodes[child]['node_info'].get_visit_count()
-            count = math.pow(count, 1/self.temperature)
+            count = math.pow(count, self.temperature)
             total_visit += count
             action_visit[action] = count
         return (np.array(action_visit) / total_visit,

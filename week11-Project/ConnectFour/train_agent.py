@@ -46,7 +46,7 @@ mcts_simulations = 50
 batch_size = 64
 epoch_logging = 50
 temperature = 1.
-temperature_decay = 0.75
+temperature_expand = 1.5
 improvement_patience = 10
 win_ratio_factor = .8
 win_ratio_min = 10
@@ -83,7 +83,7 @@ def generate_training_data(agent, data_path, n_games=training_games):
         chance = 1
         reward = [0., 0.]
         mcts = MCTSConnectFour(obs[chance], chance, agent, simulations=mcts_simulations,
-                               temperature=temperature, temperature_decay=temperature_decay)
+                               temperature=temperature, temperature_expand=temperature_expand)
         while True:
             mcts.run_simulations()
             pi, z = mcts.get_simulated_policy_value()
