@@ -40,7 +40,7 @@ learning_rate = 0.001
 weight_decay = 0.0001
 episodes = 100
 epochs = 500
-win_ratio = 5
+win_ratio = 55
 training_games = 50
 mcts_simulations = 50
 batch_size = 64
@@ -48,8 +48,8 @@ epoch_logging = 50
 temperature = 1.
 temperature_decay = 0.75
 improvement_patience = 10
-win_ratio_factor = 1.1
-win_ratio_max = 55
+win_ratio_factor = .8
+win_ratio_min = 10
 early_stopping_patience = 50
 
 # Set Seeds for Reproducibility
@@ -191,7 +191,7 @@ for episode in range(1, episodes+1):
     _ = evaluate(current_agent, RandomPlayer())
     if better:
         improve_patience = 0
-        win_ratio = min(win_ratio * win_ratio_factor, win_ratio_max)
+        win_ratio = max(win_ratio * win_ratio_factor, win_ratio_min)
         print("Found better agent...updating...")
         best_model.load_state_dict(current_model.state_dict())
         os.remove(BEST_MODEL_PATH)
