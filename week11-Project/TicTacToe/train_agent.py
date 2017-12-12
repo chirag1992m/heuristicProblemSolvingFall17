@@ -190,21 +190,11 @@ for episode in range(1, episodes+1):
     train_model(training_data_paths, CURRENT_MODEL_PATH)
 
     current_agent = SelfPlayRLAgent(CURRENT_MODEL_PATH, "current_agent")
-    better, win_ratio_check = evaluate(current_agent, best_agent)
+    better, _ = evaluate(current_agent, best_agent)
     print("Completed episode: {}".format(episode))
 
-    _, random_win_ratio = evaluate(current_agent, RandomPlayer())
+    _, _ = evaluate(current_agent, RandomPlayer())
     if better:
-        improve_patience = 0
-        win_ratio = max(win_ratio * win_ratio_factor, win_ratio_min)
-        print("Found better agent...updating...")
-        best_model.load_state_dict(current_model.state_dict())
-        os.remove(BEST_MODEL_PATH)
-        torch.save({'model': best_model.state_dict()}, BEST_MODEL_PATH)
-    elif best_random_ratio < random_win_ratio and (win_ratio_check == float('inf')
-                                                   or win_ratio_check == 0):
-        print("Updating for random bot improvement")
-        best_random_ratio = random_win_ratio
         improve_patience = 0
         win_ratio = max(win_ratio * win_ratio_factor, win_ratio_min)
         print("Found better agent...updating...")
@@ -216,6 +206,3 @@ for episode in range(1, episodes+1):
         if improve_patience >= improvement_patience:
             print("No improvement since last episodes. Stopping training...")
             break
-    if randomize_eval and win_ratio == win_ratio_min:
-        print("Switching on evaluation mode...")
-        randomize_eval = False
