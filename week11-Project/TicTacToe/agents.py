@@ -24,6 +24,12 @@ class Agent(object):
     def get_name(self):
         return "No Agent!"
 
+    def eval(self):
+        pass
+
+    def train(self):
+        pass
+
 
 class SelfPlayRLAgent(Agent):
     def __init__(self, filename, name=None, verbose=False, eval=False):
@@ -69,6 +75,12 @@ class SelfPlayRLAgent(Agent):
 
     def get_name(self):
         return self.name
+
+    def eval(self):
+        self.eval = True
+
+    def train(self):
+        self.eval = False
 
     @staticmethod
     def filename():

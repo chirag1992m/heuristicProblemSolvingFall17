@@ -174,6 +174,7 @@ torch.save({'model': best_model.state_dict()}, BEST_MODEL_PATH)
 improve_patience = 0
 for episode in range(1, episodes+1):
     best_agent = SelfPlayRLAgent(BEST_MODEL_PATH, "best_agent")
+    best_agent.train()
 
     TRAINING_DATA_PATH = os.path.join(TRAIN_DIR, 'episode_{}.pkl'.format(episode))
     generate_training_data(best_agent, TRAINING_DATA_PATH)

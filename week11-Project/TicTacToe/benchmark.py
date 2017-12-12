@@ -5,6 +5,8 @@ import gym
 
 
 def benchmark_agent(agent_1, agent_2, games=1000):
+    agent_1.eval()
+    agent_2.eval()
     env = gym.make('TicTacToe3x3-v0')
     agent_1_win, agent_2_win, draws = 0, 0, 0
     total_games = 0
