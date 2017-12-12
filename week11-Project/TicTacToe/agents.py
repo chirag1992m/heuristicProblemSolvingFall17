@@ -54,24 +54,16 @@ class SelfPlayRLAgent(Agent):
             print(P, V)
         return torch.multinomial(P[0], num_samples=1)[0]
 
-    def get_action_value_maximizer(self, state, chance):
-        possible_actions = TicTacToeEnv.get_possible_actions(state)
-        if not possible_actions:
-            return None
-        values = [-1.1] * 9
-        for action in possible_actions:
-            current_state = state.copy()
-            TicTacToeEnv.make_move(current_state, action, chance)
-            _, value = self.get_non_torch_p_v(current_state, 1 - chance)
-            values[action] = value
-        action_to_take = np.argmax(values)
+    def get_action_maximizer(self, state, chance):
+        P, V = self.get_p_v(state, chance)
         if self.verbose:
-            print("Next Values: ", values, action_to_take)
+            print(P, V)
+        action_to_take = np.argmax(P.data.numpy()[0])
         return action_to_take
 
     def get_action(self, state, chance):
         if self.eval:
-            return self.get_action_value_maximizer(state, chance)
+            return self.get_action_maximizer(state, chance)
         else:
             return self.get_action_sampled(state, chance).data.numpy()[0]
 
