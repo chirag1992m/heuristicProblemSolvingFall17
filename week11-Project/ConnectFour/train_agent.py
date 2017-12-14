@@ -53,12 +53,13 @@ win_ratio_min = 10
 early_stopping_patience = 50
 randomize_eval = True
 best_random_ratio = 0.0
+cuda = True and torch.cuda.is_available()
 
 # Set Seeds for Reproducibility
 torch.manual_seed(42)
 np.random.seed(42)
 random.seed(42)
-if torch.cuda.is_available():
+if cuda:
     torch.cuda.manual_seed(42)
 
 # Initialize variables
@@ -129,8 +130,9 @@ def train_model(dataset_path, path_to_save):
     for epoch in range(1, epochs+1):
         losses = []
         for batch_id, data in enumerate(dataloader):
-            states, masks = Variable(data['inp']), Variable(data['mask'])
-            P, V = current_model(states, masks)
+            states, chances = Variable(data['inp_state']), Variable(data['inp_chance'])
+            masks = Variable(data['mask'])
+            P, V = current_model(states, chances, masks)
             PI, Z = Variable(data['PI']), Variable(data['Z'])
             loss = loss_function(P, V, PI, Z)
 

@@ -4,11 +4,11 @@ import sys
 
 from gym.envs.board_game.connect_four import ConnectFourEnv
 
-paths = os.listdir('tic_tac_toe_train_data')
+paths = os.listdir('connect_four_train_data')
 data_paths = []
 for path in paths:
     if path.startswith('episode_'):
-        data_paths.append(os.path.join('tic_tac_toe_train_data', path))
+        data_paths.append(os.path.join('connect_four_train_data', path))
 
 data = []
 for data_path in data_paths:

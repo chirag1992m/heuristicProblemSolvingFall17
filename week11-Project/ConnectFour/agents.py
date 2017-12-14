@@ -46,9 +46,9 @@ class SelfPlayRLAgent(Agent):
 
     def get_p_v(self, state, chance):
         possible_moves = ConnectFourEnv.get_possible_actions(state)
-        x = get_tensor_from_state(state, chance)
+        x, y = get_tensor_from_state(state, chance)
         mask = get_possible_action_mask(possible_moves)
-        return self.model(x, mask)
+        return self.model(x, y, mask)
 
     def get_non_torch_p_v(self, state, chance):
         P, V = self.get_p_v(state, chance)
