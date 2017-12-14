@@ -34,7 +34,7 @@ class AlphaZeroConnectFour(nn.Module):
 
         P = self.P_squash(self.P(intermediate))
         P = P * mask
-        y = torch.sum(P, dim=1)
+        y = torch.sum(P, dim=1).clamp(min=1e-12)
         y = torch.unsqueeze(y, dim=1)
         P = P / y
         V = self.V_squash(self.V(intermediate))
