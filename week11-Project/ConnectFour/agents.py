@@ -1,0 +1,114 @@
+"""
+File containing the different agents. All agents inherit
+the general Agent class returns name and action on calling
+it's method.
+"""
+import sys
+import numpy as np
+import torch
+
+from .model import AlphaZeroConnectFour, get_possible_action_mask, get_tensor_from_state
+
+from gym.utils import seeding
+from gym.envs.board_game.connect_four import make_connect_four_random_policy
+from gym.envs.board_game.connect_four import ConnectFourEnv
+
+
+class Agent(object):
+    def __init__(self):
+        super(Agent, self).__init__()
+
+    def get_action(self, state, chance):
+        raise NotImplementedError("Agent action not implemented")
+
+    def get_name(self):
+        return "No Agent!"
+
+    def eval(self):
+        pass
+
+    def train(self):
+        pass
+
+
+class SelfPlayRLAgent(Agent):
+    def __init__(self, filename, name=None, verbose=False, eval=False):
+        super(SelfPlayRLAgent, self).__init__()
+        checkpoint = torch.load(filename if filename is not None else SelfPlayRLAgent.filename())
+        self.model = AlphaZeroConnectFour()
+        self.model.load_state_dict(checkpoint['model'])
+        self.model.eval()
+        self.name = 'Self_Play'
+        if name is not None:
+            self.name = name
+        self.verbose = verbose
+        self.eval_val = eval
+
+    def get_p_v(self, state, chance):
+        possible_moves = ConnectFourEnv.get_possible_actions(state)
+        x, y = get_tensor_from_state(state, chance)
+        mask = get_possible_action_mask(possible_moves)
+        return self.model(x, y, mask)
+
+    def get_non_torch_p_v(self, state, chance):
+        P, V = self.get_p_v(state, chance)
+        return P.data.numpy()[0], V.data.numpy()[0][0]
+
+    def get_action_sampled(self, state, chance):
+        P, V = self.get_p_v(state, chance)
+        if self.verbose:
+            print(P, V)
+        return torch.multinomial(P[0], num_samples=1)[0]
+
+    def get_action_maximizer(self, state, chance):
+        P, V = self.get_p_v(state, chance)
+        if self.verbose:
+            print(P, V)
+        action_to_take = np.argmax(P.data.numpy()[0])
+        return action_to_take
+
+    def get_action(self, state, chance):
+        if self.eval_val:
+            return self.get_action_maximizer(state, chance)
+        else:
+            return self.get_action_sampled(state, chance).data.numpy()[0]
+
+    def get_name(self):
+        return self.name
+
+    def eval(self):
+        self.eval_val = True
+
+    def train(self):
+        self.eval_val = False
+
+    @staticmethod
+    def filename():
+        return "ConnectFourAgent.pkl"
+
+
+class RandomPlayer(Agent):
+    def __init__(self):
+        super(RandomPlayer, self).__init__()
+        np_random, _ = seeding.np_random(42)
+        self.player = make_connect_four_random_policy(np_random)
+        self.name = "Random"
+
+    def get_action(self, state, chance):
+        return self.player(state)
+
+    def get_name(self):
+        return self.name
+
+
+class HumanPlayer(Agent):
+    def __init__(self):
+        super(HumanPlayer, self).__init__()
+        self.name = "Human"
+
+    def get_action(self, state, chance):
+        action = int(input("Human, make your move {}: ".format(chance)))
+        return action - 1
+
+    def get_name(self):
+        return self.name
