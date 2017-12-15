@@ -43,8 +43,8 @@ class AlphaZeroConnectFour(nn.Module):
 
 
 def loss_function(P, V, pi, z):
-    value_loss = functional.mse_loss(torch.squeeze(V), z)
-    policy_loss = functional.binary_cross_entropy(torch.squeeze(P), pi)
+    value_loss = functional.mse_loss(V, z)
+    policy_loss = functional.binary_cross_entropy(P, pi)
 
     return value_loss + policy_loss
 
